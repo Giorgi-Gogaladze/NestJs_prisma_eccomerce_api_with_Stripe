@@ -1,0 +1,6 @@
+model ProductImage {
+    id   String @id @default(uuid())  @db.Uuid
+    imageUrl String
+
+    @@map("product_images")
+}

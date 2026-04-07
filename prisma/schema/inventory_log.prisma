@@ -3,6 +3,7 @@ model InventoryLog {
     changeAmount Int
     reason InventoryChangeReason
     createdAt DateTime @default(now())
+
 }
 
 enum InventoryChangeReason {
