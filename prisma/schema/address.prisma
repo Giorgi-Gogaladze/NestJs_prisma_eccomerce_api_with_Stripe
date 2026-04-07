@@ -1,0 +1,13 @@
+model Address {
+  id          String    @id @default(uuid())
+  userId      String
+  city        String
+  street      String
+  zipCode     String
+  isDefault   Boolean   @default(false)
+  phoneNumber String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("addresses")
+}

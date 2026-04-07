@@ -1,9 +1,9 @@
 model OrderItem {
-    id  STring @id  @default(uuid())  @db.Uuid()
-    quantity  Int
-    price  Float @db.Decimal(10, 2)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        STring    @id @default(uuid()) @db.Uuid()
+  quantity  Int
+  price     Float     @db.Decimal(10, 2)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-    @@map("order_items")
+  @@map("order_items")
 }
