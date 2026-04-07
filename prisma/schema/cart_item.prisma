@@ -1,0 +1,14 @@
+model CartItem {
+  id            String    @default(uuid()) @db.Uuid()
+  quantity      Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  totalPrice    Float     @db.Decimal(10, 2)
+  selectedSize  String?
+  selectedColor String?
+  quantity      Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("cart_items")
+}
