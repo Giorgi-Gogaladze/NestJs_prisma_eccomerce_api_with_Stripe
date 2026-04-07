@@ -1,0 +1,13 @@
+model InventoryLog {
+    id String @id @default(uuid())  @db.Uuid
+    changeAmount Int
+    reason InventoryChangeReason
+    createdAt DateTime @default(now())
+}
+
+enum InventoryChangeReason {
+    SALE
+    RETURN
+    ADJUSTMENT
+    OTHER
+}
