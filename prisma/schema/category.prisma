@@ -1,0 +1,10 @@
+model Category {
+  id           String    @default(uuid()) @db.Uuid
+  name         String
+  description  String?   @default("No description provided") @db.Text
+  slug         String    @unique
+  thumbnailUrl String?
+  isActive     Boolean?  @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
