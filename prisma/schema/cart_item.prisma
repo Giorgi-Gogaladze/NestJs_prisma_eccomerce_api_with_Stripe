@@ -1,7 +1,6 @@
 model CartItem {
   id            String   @id  @default(uuid()) @db.Uuid()
   quantity      Int
-  totalPrice    Decimal     @db.Decimal(10, 2)
   selectedSize  String?
   selectedColor String?
   createdAt     DateTime  @default(now())

@@ -1,4 +1,7 @@
 model ProductAtribute {
-    id  String  @id @default(uuid())
-    value String 
+    id    String @id @default(uuid())
+    value String
+
+
+    @@map("product_attributes")
 }

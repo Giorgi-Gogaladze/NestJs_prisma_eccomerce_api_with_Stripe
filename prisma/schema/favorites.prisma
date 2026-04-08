@@ -1,0 +1,9 @@
+model Favorites {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  //relations
+  userId    String   @db.Uuid
+  user User @relation(fields: [userId], references: [id])
+}

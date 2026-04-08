@@ -9,6 +9,13 @@ model User {
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
+    //relations
+    favorites Favorites[]
+    addresses Address[]
+    reviews Reviews[]
+    ordders Order[]
+    carts Cart[]
+    
     @@map("users")
 }
 

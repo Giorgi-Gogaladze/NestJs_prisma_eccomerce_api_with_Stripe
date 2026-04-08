@@ -1,6 +1,5 @@
 model Address {
   id          String    @id @default(uuid())
-  userId      String
   city        String
   street      String
   zipCode     String
@@ -8,6 +7,11 @@ model Address {
   phoneNumber String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+
+  //relations
+  userId String
+  user User @relation(fields: [userId], references: [id])
 
   @@map("addresses")
 }
