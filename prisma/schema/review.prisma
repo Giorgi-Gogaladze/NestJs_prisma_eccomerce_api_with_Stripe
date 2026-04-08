@@ -1,6 +1,6 @@
 model Reviews {
   id        String    @id @default(uuid()) @db.Uuid
-  rating    Float     @db.decimal(2, 1)
+  rating    Decimal     @db.Decimal(2, 1)
   comment   String
   createdAt DateTime  @default(now())
 }
