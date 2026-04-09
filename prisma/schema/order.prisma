@@ -11,6 +11,14 @@ model Order {
   userId String
   user User @relation(fields: [userId], references: [id])
 
+  order_items OrderItem[]
+
+  addressId String @db.Uuid
+  address Address @relation(fields: [addressId], references: [id])
+
+  couponId String? @db.Uuid
+  coupon Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+
   @@map("orders")
 }
 

@@ -6,5 +6,12 @@ model CartItem {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  //
+  productId String @db.Uuid
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  cartId String @db.Uuid
+  cart Cart @relation(fields: [cartId], references: [id])
+
   @@map("cart_items")
 }

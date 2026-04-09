@@ -6,7 +6,9 @@ model Cart {
 
 
   userId String
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  cart_items CartItem[]
 
   @@map("carts")
 }

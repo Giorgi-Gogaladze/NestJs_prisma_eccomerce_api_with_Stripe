@@ -14,5 +14,9 @@ model Category {
   updatedAt    DateTime    @updatedAt
 
 
+  //rel
+  product Product[]
+
+
   @@map("categories")
 }

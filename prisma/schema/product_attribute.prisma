@@ -3,5 +3,11 @@ model ProductAtribute {
     value String
 
 
+    attributeId String
+    attribute Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+    productId String @db.Uuid
+    product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
     @@map("product_attributes")
 }

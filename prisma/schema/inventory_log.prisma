@@ -4,6 +4,10 @@ model InventoryLog {
     reason InventoryChangeReason
     createdAt DateTime @default(now())
 
+    //rel
+    productId String @db.Uuid
+    product Product @relation(fields: [productId], references: [id])
+
 }
 
 enum InventoryChangeReason {

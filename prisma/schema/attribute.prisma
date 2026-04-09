@@ -2,5 +2,8 @@ model Attribute {
     id   String @id @default(uuid())
     name String @unique
 
+    //rel
+    product_attributes ProductAtribute[]
+
     @@map("atributes")
 }
