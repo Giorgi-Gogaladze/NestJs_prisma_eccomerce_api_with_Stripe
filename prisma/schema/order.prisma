@@ -19,6 +19,8 @@ model Order {
   couponId String? @db.Uuid
   coupon Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
 
+  payment Payment?
+
   @@map("orders")
 }
 
