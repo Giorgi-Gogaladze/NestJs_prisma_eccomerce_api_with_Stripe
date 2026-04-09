@@ -1,17 +1,16 @@
 model Address {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid()) @db.Uuid
   city        String
   street      String
   zipCode     String
-  isDefault   Boolean   @default(false)
+  isDefault   Boolean  @default(false)
   phoneNumber String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   //relations
-  userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String  @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   orders Order[]
 

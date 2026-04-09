@@ -8,7 +8,7 @@ model Order {
 
 
   //rel
-  userId String
+  userId String  @db.Uuid
   user User @relation(fields: [userId], references: [id])
 
   order_items OrderItem[]
