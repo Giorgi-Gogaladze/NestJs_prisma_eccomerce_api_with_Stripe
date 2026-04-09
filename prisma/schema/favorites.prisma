@@ -6,8 +6,8 @@ model Favorites {
   userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  productId String  @db.Uuid
-  product   Product @relation(fields: [productId], references: [id])
+  variantId String         @db.Uuid
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
-  @@unique([userId])
+  @@unique([userId, variantId])
 }
