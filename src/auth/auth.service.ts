@@ -1,9 +1,10 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt'
 import { SignupDto } from './dto/signup.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
+import { SigninDto } from './dto/signin.dto';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +13,8 @@ export class AuthService {
     private jwtService: JwtService
   ){}
 
-  async signup(signupDto: SignupDto): Promise<{user: Omit<User, 'password' | 'refreshToken'>, access_token: string}> {
+
+  async signup(signupDto: SignupDto): Promise<{user: Omit<User, 'password' | 'refreshToken'>, accessToken: string}> {
     const {email, password, firstName, lastName} = signupDto;
 
     const salt = await bcrypt.genSalt();
@@ -38,7 +40,7 @@ export class AuthService {
 
     return {
       user: userWithoutSensitive,
-      access_token: await this.jwtService.signAsync(payload),
+      accessToken: await this.jwtService.signAsync(payload),
     }
 
     } catch (error:any) {
@@ -48,4 +50,39 @@ export class AuthService {
       throw new InternalServerErrorException();
     }
   }
+
+
+  async singin(signinDto: SigninDto): Promise<{accessToken: string}>{
+    const {email, password} = signinDto;
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      }
+    })
+    if(!user){
+      throw new ForbiddenException('Invalid credentials');
+    };
+
+    const passMatches = await bcrypt.compare(password, user.password);
+
+    if(!passMatches){
+      throw new ForbiddenException('Invalid credentials');
+    };
+
+    const payload = {
+        email: user.email,
+        sub: user.id,
+        role: user.role
+      };
+
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: '1h',
+      secret: process.env.JWT_SECRET
+    });
+
+    return {accessToken};
+  }
+
+
 }

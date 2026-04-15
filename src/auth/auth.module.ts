@@ -7,10 +7,12 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Module({
   imports: [
-    JwtModule.register({
+    JwtModule.registerAsync({
       global: true,
-      secret: process.env.JWT_SECRET || 'default_secret',
-      signOptions: {expiresIn: '1h'},
+      useFactory: () => ({
+        secret: process.env.JWT_SECRET || 'default_secret',
+        signOptions: {expiresIn: '1h'},
+      })
     })
   ],
   controllers: [AuthController],
