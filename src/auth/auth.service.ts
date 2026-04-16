@@ -5,6 +5,7 @@ import { SignupDto } from './dto/signup.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import { SigninDto } from './dto/signin.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -84,5 +85,47 @@ export class AuthService {
     return {accessToken};
   }
 
+  async undateUser(user: User, updateUserDto: UpdateUserDto): Promise<{user: Omit<User, 'password' | 'refreshToken'>}> {
+    const { email, firstName, lastName, newPassword, oldPassword} = updateUserDto;
 
+    const updateData: any = {};
+
+    if(email && email !== user.email){
+      const exiistingEmail = await this.prisma.user.findUnique({
+        where: { email }
+      });
+
+      if(exiistingEmail){
+        throw new ConflictException('Email already exists');
+      }
+
+      updateData.email = email;
+      
+      if(firstName) updateData.firstName = firstName;
+      if(lastName) updateData.lastName = lastName;
+    }
+
+    if(newPassword){
+
+      if(!oldPassword){
+        throw new ForbiddenException('Old password is required to set a new password');
+      };
+
+      const passMatches = await bcrypt.compare(oldPassword, user.password);
+      if(!passMatches){
+        throw new ForbiddenException('Old password is incorrect');
+      };
+
+      const salt = await bcrypt.genSalt();
+      updateData.password = await bcrypt.hash(newPassword, salt);
+    }
+    const updatedUser = await this.prisma.user.update({
+      where: { id: user.id},
+      data: updateData
+    }) 
+
+    const  {password: _, refreshToken, ...rest} = updatedUser;
+    return {user: rest};
+  
+  }
 }
