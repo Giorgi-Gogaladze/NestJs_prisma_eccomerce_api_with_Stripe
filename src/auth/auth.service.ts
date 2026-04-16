@@ -55,14 +55,15 @@ export class AuthService {
 
 
 
-  async singin(signinDto: SigninDto): Promise<{accessToken: string}>{
+  async signin(signinDto: SigninDto): Promise<{accessToken: string}>{
     const {email, password} = signinDto;
 
     const user = await this.prisma.user.findUnique({
       where: {
         email,
       }
-    })
+    });
+
     if(!user){
       throw new ForbiddenException('Invalid credentials');
     };
@@ -91,7 +92,7 @@ export class AuthService {
 
 
 
-  async undateUser(user: User, updateUserDto: UpdateUserDto): Promise<{user: Omit<User, 'password' | 'refreshToken'>}> {
+  async updateUser(user: User, updateUserDto: UpdateUserDto): Promise<{user: Omit<User, 'password' | 'refreshToken'>}> {
     const { email, firstName, lastName, newPassword, oldPassword} = updateUserDto;
 
     const updateData: any = {};
