@@ -53,6 +53,8 @@ export class AuthService {
   }
 
 
+
+
   async singin(signinDto: SigninDto): Promise<{accessToken: string}>{
     const {email, password} = signinDto;
 
@@ -85,6 +87,10 @@ export class AuthService {
     return {accessToken};
   }
 
+
+
+
+
   async undateUser(user: User, updateUserDto: UpdateUserDto): Promise<{user: Omit<User, 'password' | 'refreshToken'>}> {
     const { email, firstName, lastName, newPassword, oldPassword} = updateUserDto;
 
@@ -100,10 +106,10 @@ export class AuthService {
       }
 
       updateData.email = email;
-      
-      if(firstName) updateData.firstName = firstName;
-      if(lastName) updateData.lastName = lastName;
     }
+
+    if(firstName) updateData.firstName = firstName;
+    if(lastName) updateData.lastName = lastName;
 
     if(newPassword){
 
@@ -128,4 +134,49 @@ export class AuthService {
     return {user: rest};
   
   }
+
+
+  async getTokens(userId: string, email: string, role: string){
+    const payload = {sub: userId, email, role};
+
+    const [accToken, refToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        expiresIn: '1h',
+        secret: process.env.JWT_SECRET
+      }),
+      this.jwtService.signAsync(payload, {
+        expiresIn: '7d',
+        secret: process.env.JWT_REFRESH_SECRET
+      }),
+    ]);
+    return {accessToken: accToken, refreshToken: refToken};
+  }
+
+
+  async updateRefToken(userId: string, refToken: string){
+    const hash = await bcrypt.hash(refToken, 8);
+    await this.prisma.user.update({
+      where: {id: userId},
+      data: {refreshToken: hash}
+    })
+  }
+
+
+
+  async refreshTokens(userId: string, refToken: string){
+  const user = await this.prisma.user.findUnique({
+    where: {id: userId}
+  });
+
+  if(!user || !user.refreshToken) throw new ForbiddenException('Access denied');
+
+  const refTokenMatches = await bcrypt.compare(refToken, user!.refreshToken!);
+  if(!refTokenMatches) throw new ForbiddenException('Access denied');
+
+  const tokens = await this.getTokens(user.id, user.email, user.role);
+  await this.updateRefToken(user.id, tokens.refreshToken);
+
+  return tokens;
+  }
+
 }
