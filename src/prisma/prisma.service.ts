@@ -2,11 +2,12 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
 import { Pool} from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config";
 
-const connectionString = process.env.DATABASE_URL || "file:./dev.db";
+const connectionString = process.env.DATABASE_URL;
 
 if(!connectionString){
-    throw new Error("DATABASE_URL environment variable is not set");
+    throw new Error("DATABASE_URL environment variable is not set. Please check your .env file.");
 }
 
 const pool = new Pool({connectionString});

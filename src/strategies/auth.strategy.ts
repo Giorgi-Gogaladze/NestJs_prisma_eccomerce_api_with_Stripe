@@ -3,14 +3,13 @@ import { Strategy, ExtractJwt} from "passport-jwt";
 import { Request } from "express";
 import { Injectable } from "@nestjs/common";
 
-//(ჩემთვის) ვიღებთ ტოკენს ჰედერიდან ანდ ქუქიებიდან და ვამოწმებთ ვალიდურობას, თუ ვალიდურია, ვაბრუნებთ payload_ს, ანუ @User დეკორატორი დააბრუნდებს ამ paylaod_ის დეითას, მეტს არაფერს.
 @Injectable()
 export class AuthStrategy extends PassportStrategy(Strategy, 'jwt') {
     constructor(){
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
                 
-            ExtractJwt.fromAuthHeaderAsBearerToken(),
+                ExtractJwt.fromAuthHeaderAsBearerToken(),
 
             (req: Request) => {
                 let token = null;
@@ -20,7 +19,7 @@ export class AuthStrategy extends PassportStrategy(Strategy, 'jwt') {
                return token; 
             }
         ]),
-            ignoreExpiration: false,  //თუ ტოკენი არ არის ვალიდური, მაშინ მოთხოვნა არ დიაშვება
+            ignoreExpiration: false,
             secretOrKey: process.env.JWT_SECRET || 'default_secret_key'
         });
     }

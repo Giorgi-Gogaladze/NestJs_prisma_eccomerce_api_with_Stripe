@@ -31,20 +31,18 @@ export class AuthService {
       },
     });
 
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role
-    };
+    const tokens = await this.getTokens(user.id, user.email, user.role);
+    await this.updateRefToken(user.id, tokens.refreshToken);
 
     const { password: _, refreshToken, ...userWithoutSensitive } = user;
 
     return {
       user: userWithoutSensitive,
-      accessToken: await this.jwtService.signAsync(payload),
+      ...tokens,
     }
 
     } catch (error:any) {
+      console.log('singup error', error)
       if(error.code ==='P2002'){
         throw new ConflictException('Email already exists');
       }

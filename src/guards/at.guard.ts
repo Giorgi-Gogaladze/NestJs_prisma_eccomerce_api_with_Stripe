@@ -7,7 +7,6 @@ export class AtGuard extends AuthGuard('jwt'){
         super();
     }
 
-    //(ჩემთვის) ეს ამოწმებს თუ არის რაიმე დეკორატორი რომელიც აღნიშნულია როგორც 'isPublic' და თუ არის, მაშინ ეს გარდი არ შეამოწმებს ტოკენს და პირდაპირ დაუშვებს მოთხოვნას.
     canActivate(context: ExecutionContext){
         const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
             context.getHandler(),
