@@ -90,10 +90,18 @@ export class AuthService {
 
 
 
-  async updateUser(user: User, updateUserDto: UpdateUserDto): Promise<{user: Omit<User, 'password' | 'refreshToken'>}> {
+  async updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<{user: Omit<User, 'password' | 'refreshToken'>}> {
     const { email, firstName, lastName, newPassword, oldPassword} = updateUserDto;
 
     const updateData: any = {};
+
+    const user = await this.prisma.user.findUnique({
+      where: {id: userId}
+    });
+
+    if(!user){
+      throw new UnauthorizedException('User not found');
+    }
 
     if(email && email !== user.email){
       const exiistingEmail = await this.prisma.user.findUnique({
@@ -121,9 +129,10 @@ export class AuthService {
         throw new ForbiddenException('Old password is incorrect');
       };
 
-      const salt = await bcrypt.genSalt();
+      const salt = await bcrypt.genSalt(10);
       updateData.password = await bcrypt.hash(newPassword, salt);
     }
+
     const updatedUser = await this.prisma.user.update({
       where: { id: user.id},
       data: updateData
@@ -176,6 +185,27 @@ export class AuthService {
   await this.updateRefToken(user.id, tokens.refreshToken);
 
   return tokens;
+  }
+
+
+
+  async getProfileData(user: User){
+    const { email } = user;
+    const currentUser = await this.prisma.user.findUnique({
+      where: {email},
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+      }
+    });
+    if(!currentUser){
+      throw new UnauthorizedException('User not found');
+    }
+
+    return currentUser;
   }
 
 }
