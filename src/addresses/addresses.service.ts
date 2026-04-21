@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAddressDto } from './dtos/create_address.dto';
 import { UpdateAddressDto } from './dtos/update_address.dto';
+import { Address } from '@prisma/client';
 
 @Injectable()
 export class AddressesService {
@@ -9,7 +10,7 @@ export class AddressesService {
         private readonly prisma: PrismaService
     ){}
 
-    async createAddress(userId: string, createAddressDto: CreateAddressDto){
+    async createAddress(userId: string, createAddressDto: CreateAddressDto): Promise<Address>{
         return await this.prisma.address.create({
             data: {
                 ...createAddressDto,
@@ -18,34 +19,51 @@ export class AddressesService {
         })
     }
 
-    async updateAddress(userId: string, updateAddressDto: UpdateAddressDto){
-        const {city, phoneNumber, street, zipCode} = updateAddressDto;
+    async updateAddress(addressId: string, userId: string, updateAddressDto: UpdateAddressDto): Promise<Address>{
 
-        const updateAddress: any = {};
+        const address = this.prisma.address.findUnique({
+            where: {
+                id: addressId,
+                userId: userId
+            }
+        })
 
-        const user = await this.prisma.user.findUnique({
-            where: {id: userId}
+        if(!address) throw new NotFoundException('Address not found')
+
+
+        return await this.prisma.address.update({
+            where: {id: addressId},
+            data: updateAddressDto
         });
-
-        if(!user){
-            throw new NotFoundException("User not found")
-        }
-
-        if(city && city !==user.email){
-            updateAddress.city = city;
-        }
-
-        if(phoneNumber) updateAddress.phoneNumber = phoneNumber;
-        if(street) updateAddress.street = street;
-        if(zipCode) updateAddress.zipCode = zipCode;
-
-
-        const updatedAddress = await this.prisma.address.update({
-            where: {id: userId},
-            data: updateAddress
-        });
-
-        return updatedAddress;
     }
+
+
+    async getAddress(userId: string): Promise<Address[] | null>{
+        return await this.prisma.address.findMany({
+            where: {userId: userId},
+        }) ;
+    }
+
+
+    async deleteAddress(addressId: string, userId: string){
+        const address = await this.prisma.address.findFirst({
+            where: {
+                id: addressId,
+                userId: userId
+            }, 
+        });
+        if(!address){
+            throw new NotFoundException('Address not found');
+        };
+
+        await this.prisma.address.delete({
+            where: {id: addressId}
+        });
+         
+        return {
+            message: 'Address removed successfully',
+        };
+    }
+    
     
 }
