@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dtos/create_category.dto';
 import slugify from 'slugify'
@@ -81,5 +81,45 @@ export class CategoriesService {
             data: updateData
         })
     }
+
+
+    async deleteCategory(id: string): Promise<{message: string}>{
+        const category = await this.prisma.category.findUnique({
+            where: {id},
+            include: {_count: {select: {product: true, children: true}}}
+        });
+
+        if(!category){
+            throw new NotFoundException('Category not found');
+        }
+
+        if(category._count.product > 0){
+            throw new BadRequestException('Cannot delete category with existing products');
+        }
+
+        if(category._count.children > 0){
+            throw new BadRequestException('Cannot delete category with sub-categories');
+        }
+
+        //ახლა არ მინდა გამოყენება(just for refference for future projs)
+        //(ჩემთვის) url-იდან Public id-ს ამოღება მაგ: "https://.../folder/image_name.jpg" -> "folder/image_name")
+        /* if(category.thumbnailUrl){
+            const parts = category.thumbnailUrl.split('/');
+            const lastPart = parts[parts.length - 1] //image_name.jpg
+            const publicId = lastPart.split('.')[0];
+
+            const folder = 'categories/'
+            await this.cloudinaryService.deleteFile(`${folder}${publicId}`)
+        } */
+
+        await this.prisma.category.delete({where: {id}});
+        return {
+            message: 'Category removed successfully'
+        } 
+        
+    }
+
+
+    async 
 
 }

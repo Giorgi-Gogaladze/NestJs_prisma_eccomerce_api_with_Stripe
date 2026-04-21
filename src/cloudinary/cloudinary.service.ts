@@ -16,4 +16,10 @@ export class CloudinaryService {
             streamifier.createReadStream(file.buffer).pipe(uploadStream);
         })
     }
+
+
+    //ქლაუდინარიდან ფოტოს წაშლა id_ით
+    async deleteFile(publicId: string){  
+        return await cloudinary.uploader.destroy(publicId)
+    }
 }
