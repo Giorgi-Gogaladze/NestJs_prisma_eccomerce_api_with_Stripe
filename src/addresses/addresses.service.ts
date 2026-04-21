@@ -11,18 +11,28 @@ export class AddressesService {
     ){}
 
     async createAddress(userId: string, createAddressDto: CreateAddressDto): Promise<Address>{
-        const existingAddress = await this.prisma.address.count({
-            where: {userId}
+
+        const existingCount = await this.prisma.address.count({
+            where: {userId} 
         });
+        const isFirstAddress = existingCount === 0;
+        const shouldBeDefault = isFirstAddress || createAddressDto.isDefault;
 
-        const isFirstAddress = existingAddress === 0;
+        return await this.prisma.$transaction(async (tx) => {
+            if(shouldBeDefault){
+                await tx.address.updateMany({
+                    where: {userId, isDefault: true},
+                    data: { isDefault: false },
+                });
+            };
 
-        return await this.prisma.address.create({
-            data: {
-                ...createAddressDto,
-                userId: userId,
-                isDefault: isFirstAddress ? true : (createAddressDto.isDefault ?? false)
-            }
+            return tx.address.create({
+                data: {
+                    ...createAddressDto,
+                    userId,
+                    isDefault: shouldBeDefault,
+                }
+            })
         })
     }
 
@@ -46,10 +56,16 @@ export class AddressesService {
 
 
 
-    async getAddresses(userId: string): Promise<Address[] | null>{
-        return await this.prisma.address.findMany({
+    async getAddresses(userId: string): Promise<Address[] | {message: string}>{
+        const addresses = await this.prisma.address.findMany({
             where: {userId: userId},
-        }) ;
+        });
+
+        if(addresses.length === 0){
+            return {message: 'User sas not address'}
+        } else{
+            return addresses;
+        }
     }
 
     

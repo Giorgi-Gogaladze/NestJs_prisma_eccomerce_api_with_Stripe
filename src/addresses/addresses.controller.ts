@@ -7,7 +7,7 @@ import { UpdateAddressDto } from './dtos/update_address.dto';
 import { AtGuard } from '../guards/at.guard';
 
 @UseGuards(AtGuard)
-@Controller('addresses')
+@Controller('address')
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
@@ -33,7 +33,7 @@ export class AddressesController {
   @Get('')
   async getAddresses(
     @User('sub') userId: string
-  ): Promise<Address[] | null>{
+  ): Promise<Address[] | {message: string}>{
     return await this.addressesService.getAddresses(userId);
   }
 
