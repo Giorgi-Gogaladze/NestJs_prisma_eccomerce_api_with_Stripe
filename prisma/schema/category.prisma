@@ -16,5 +16,7 @@ model Category {
   //rel
   product Product[]
 
+  @@unique([name, parentId])  //ერთი მშობლის ქვეშ სახელი და  მშობლის აიდი არ უნდა გამოერდეს(რაც უნიკალურობას უქყობს ხელს)
+
   @@map("categories")
 }

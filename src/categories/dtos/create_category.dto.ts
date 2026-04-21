@@ -14,11 +14,11 @@ export class CreateCategoryDto{
 
     @IsUUID('4', {message: "ParentId must be a valid UUID"})
     @IsOptional()
-    parentId?: string;
+    parentId?: string | null;
 
     @IsBoolean()
     @IsOptional()
-    isActiove?: string;
+    isActiove?: boolean;
 
     
 }
