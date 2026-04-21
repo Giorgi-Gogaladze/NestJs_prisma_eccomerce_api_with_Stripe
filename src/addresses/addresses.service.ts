@@ -11,10 +11,17 @@ export class AddressesService {
     ){}
 
     async createAddress(userId: string, createAddressDto: CreateAddressDto): Promise<Address>{
+        const existingAddress = await this.prisma.address.count({
+            where: {userId}
+        });
+
+        const isFirstAddress = existingAddress === 0;
+
         return await this.prisma.address.create({
             data: {
                 ...createAddressDto,
-                userId: userId
+                userId: userId,
+                isDefault: isFirstAddress ? true : (createAddressDto.isDefault ?? false)
             }
         })
     }
