@@ -21,12 +21,12 @@ export class AddressesService {
 
     async updateAddress(addressId: string, userId: string, updateAddressDto: UpdateAddressDto): Promise<Address>{
 
-        const address = this.prisma.address.findUnique({
+        const address = await this.prisma.address.findFirst({
             where: {
                 id: addressId,
                 userId: userId
             }
-        })
+        });
 
         if(!address) throw new NotFoundException('Address not found')
 
@@ -38,12 +38,14 @@ export class AddressesService {
     }
 
 
-    async getAddress(userId: string): Promise<Address[] | null>{
+
+    async getAddresses(userId: string): Promise<Address[] | null>{
         return await this.prisma.address.findMany({
             where: {userId: userId},
         }) ;
     }
 
+    
 
     async deleteAddress(addressId: string, userId: string){
         const address = await this.prisma.address.findFirst({

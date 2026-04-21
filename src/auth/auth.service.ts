@@ -199,6 +199,16 @@ export class AuthService {
         firstName: true,
         lastName: true,
         role: true,
+        addresses: {
+          select: {
+            id: true,
+            city: true,
+            phoneNumber: true,
+            street: true,
+            zipCode: true,
+            createdAt: true,
+          }
+        }
       }
     });
     if(!currentUser){
