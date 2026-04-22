@@ -6,6 +6,13 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Category } from '@prisma/client';
 import { UpdateCategoryDto } from './dtos/update_category.dto';
 
+interface categoryWithChildren extends Category {
+    children: categoryWithChildren[];
+    _count?: {
+        product: number;
+    };
+}
+
 @Injectable()
 export class CategoriesService {
     constructor (
@@ -102,7 +109,7 @@ export class CategoriesService {
         }
 
         //ახლა არ მინდა გამოყენება(just for refference for future projs)
-        //(ჩემთვის) url-იდან Public id-ს ამოღება მაგ: "https://.../folder/image_name.jpg" -> "folder/image_name")
+        //(ჩემთვის) url-იდან Publicid-ს ამოღება და წაშლა მაგ: "https://.../folder/image_name.jpg" -> "folder/image_name")
         /* if(category.thumbnailUrl){
             const parts = category.thumbnailUrl.split('/');
             const lastPart = parts[parts.length - 1] //image_name.jpg
@@ -120,6 +127,34 @@ export class CategoriesService {
     }
 
 
-    async 
+    async getAllCategories(){ 
+        //(ჩემთვის) აქ ვაბრტყელებთ კატეგორიებს, რომ შემდედგ შევქმნათ ხე
+        const allCategories = await this.prisma.category.findMany({
+            include: {
+                _count: { select: {product: true}}
+            },
+        });
+
+        //მერე მეპს ვქმნით ჩილდრენები, რომ თუ ვინმეს შვილი ჰყავს, იქ ჩაბაგდოთ და ხისებრი სტრუქტურა შევქმნათ
+        const categoryMap = new Map<string, categoryWithChildren>();
+
+        allCategories.forEach((cat) => {
+            categoryMap.set(cat.id, {...cat, children: []});
+        })
+
+        const tree: categoryWithChildren[] = [];
+        for(const cat of categoryMap.values()){
+            if(cat.parentId === null){
+                tree.push(cat)
+            }else {
+                const parent  = categoryMap.get(cat.parentId);
+                if(parent){
+                    parent.children.push(cat)
+                }
+            }
+        };
+
+        return tree;
+    }
 
 }
