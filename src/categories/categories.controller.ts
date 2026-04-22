@@ -18,6 +18,13 @@ export class CategoriesController {
     return await this.categoriesService.getAllCategories()
   }
 
+  @Get(':slug')
+  async getCategoryBySlug(
+    @Param('slug') slug: string,
+  ){
+    return await this.categoriesService.getCategoryBySlug(slug);
+  }
+
   
   @UseGuards(AtGuard, RolesGuard)
   @Roles('ADMIN')

@@ -157,4 +157,36 @@ export class CategoriesService {
         return tree;
     }
 
+
+    async getCategoryBySlug(slug: string){
+        const category = await this.prisma.category.findUnique({
+            where: {slug: slug},
+            include: {
+                children: {
+                    include: {
+                        _count: {
+                            select: {
+                                product: true
+                            }
+                        }
+                    }
+                },
+                product: true
+            }
+        });
+        if(!category)  throw new NotFoundException("Category not found");
+
+        const hasChildren = category.children.length > 0;
+
+        return {
+            id: category.id,
+            name: category.name,
+            description: category.description,
+            thumbnailUrl: category.thumbnailUrl,
+            subCategories: hasChildren ? category.children : [],
+            products: hasChildren  ? [] : category.product,
+            isLeaf: !hasChildren  //ფლაგი ფრონტნდისთვის
+        }
+    }
+
 }
