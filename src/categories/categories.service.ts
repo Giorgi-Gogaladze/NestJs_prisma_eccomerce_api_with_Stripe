@@ -6,7 +6,7 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Category } from '@prisma/client';
 import { UpdateCategoryDto } from './dtos/update_category.dto';
 
-interface categoryWithChildren extends Category {
+export interface categoryWithChildren extends Category {
     children: categoryWithChildren[];
     _count?: {
         product: number;
@@ -127,7 +127,7 @@ export class CategoriesService {
     }
 
 
-    async getAllCategories(){ 
+    async getAllCategories(): Promise<categoryWithChildren[]>{ 
         //(ჩემთვის) აქ ვაბრტყელებთ კატეგორიებს, რომ შემდედგ შევქმნათ ხე
         const allCategories = await this.prisma.category.findMany({
             include: {

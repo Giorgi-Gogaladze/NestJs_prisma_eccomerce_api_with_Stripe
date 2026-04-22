@@ -20,7 +20,7 @@ export class AddressesController {
   }
 
 
-  @Patch('update/:addressId')
+  @Patch(':addressId')
   async updateAddress(
     @User('sub') userId: string,
     @Body() updateAddressDto: UpdateAddressDto,
@@ -38,7 +38,7 @@ export class AddressesController {
   }
 
 
-  @Delete('delete/:addressId')
+  @Delete(':addressId')
   async deleteAddress(
       @User('sub') userId: string,
       @Param('addressId') addressId: string
