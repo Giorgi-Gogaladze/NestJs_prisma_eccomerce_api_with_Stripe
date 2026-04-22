@@ -12,7 +12,8 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true
+      transform: true,
+      transformOptions: {enableImplicitConversion: true} //როცა მონაცემებს form-data-ს სახითვაგზავნით, ყველაფერი სტრინგად მოდის, მათ შორის ბულიანიც  და ეს ეხმარება რომ სწორ ტიპად გარდაქმანს ისევ
     })
   )
 

@@ -42,7 +42,7 @@ export class CategoriesService {
         let thumbnailUrl = null;
         if(file){
             //ქლაუდინარიზე ატვირთვა
-            const uplaodRes = await this.cloudinaryService.UploadFile(file);
+            const uplaodRes = await this.cloudinaryService.uploadFile(file);
             thumbnailUrl = uplaodRes.secure_url;
         }
 
@@ -53,7 +53,7 @@ export class CategoriesService {
                 parentId: dto.parentId || null,
                 slug: categorySlug,
                 thumbnailUrl: thumbnailUrl,
-                isActive: dto.isActiove ?? true
+                isActive: dto.isActive ?? true
             }
         })
 
@@ -79,7 +79,7 @@ export class CategoriesService {
         }
 
         if(file){
-            const uploadRes = await this.cloudinaryService.UploadFile(file);
+            const uploadRes = await this.cloudinaryService.uploadFile(file);
             updateData.thumbnailUrl = uploadRes.secure_url;
         }
 

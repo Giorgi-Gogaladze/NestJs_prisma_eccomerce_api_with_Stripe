@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, ParseFilePipeBuilder, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CategoriesService, categoryWithChildren } from './categories.service';
 import { CreateCategoryDto } from './dtos/create_category.dto';
-import { ExpressAdapter, FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Category } from '@prisma/client';
 import { UpdateCategoryDto } from './dtos/update_category.dto';
 import { AtGuard } from '../guards/at.guard';
@@ -22,7 +22,7 @@ export class CategoriesController {
   @UseGuards(AtGuard, RolesGuard)
   @Roles('ADMIN')
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('thumbnailUrl'))
   async createCategory(
     @Body() dto: CreateCategoryDto,
     @UploadedFile(
@@ -37,16 +37,16 @@ export class CategoriesController {
         errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
       }),
     )
-    file: Express.Multer.File
+    thumbnailUrl: Express.Multer.File
   ): Promise<Category>{
-    return await this.categoriesService.createCategory(dto, file)
+    return await this.categoriesService.createCategory(dto, thumbnailUrl)
   }
 
 
   @UseGuards(AtGuard, RolesGuard)
   @Roles('ADMIN')
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('thumbnailUrl'))
   async updateCategory(
     @Param('id') id: string,
     @Body() dto: UpdateCategoryDto,
@@ -61,9 +61,9 @@ export class CategoriesController {
       .build({
         errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
       }),
-    ) file: Express.Multer.File
+    ) thumbnailUrl: Express.Multer.File
   ): Promise<Category>{
-    return await this.categoriesService.updateCategory(id, dto, file)
+    return await this.categoriesService.updateCategory(id, dto, thumbnailUrl)
   }
 
 

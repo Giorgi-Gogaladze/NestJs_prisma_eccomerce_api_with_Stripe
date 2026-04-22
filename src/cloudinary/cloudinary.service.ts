@@ -5,7 +5,7 @@ const streamifier = require('streamifier')
 
 @Injectable()
 export class CloudinaryService {
-    async UploadFile(file: Express.Multer.File): Promise<CloudinaryResponse>{
+    async uploadFile(file: Express.Multer.File): Promise<CloudinaryResponse>{
         return new Promise<CloudinaryResponse>((resolve, reject) => {
             const uploadStream  = cloudinary.uploader.upload_stream(
                 (error, result) => {

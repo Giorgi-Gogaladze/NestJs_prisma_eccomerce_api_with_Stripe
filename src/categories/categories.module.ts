@@ -5,7 +5,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
-  controllers: [CategoriesController, CloudinaryModule],  //რომ შეძლოს ქლაუდინარის გამოყენება(არ უნდა დამავიწყდეს)
+  imports: [CloudinaryModule],  //არ უნდა დამავიწყდეს, რომ შეძლოს ქლაუდინარის გამოყენება
+  controllers: [CategoriesController],
   providers: [CategoriesService, PrismaService],
 })
 export class CategoriesModule {}
