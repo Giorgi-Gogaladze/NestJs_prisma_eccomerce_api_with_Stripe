@@ -59,7 +59,8 @@ export class CategoriesController {
         maxSize: 2 * 1024 * 1024
       })
       .build({
-        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        fileIsRequired: false   // (მნიშვნელოვანი!!) ფაილი რომ სავალდებულო არ იყსო.
       }),
     ) thumbnailUrl: Express.Multer.File
   ): Promise<Category>{
