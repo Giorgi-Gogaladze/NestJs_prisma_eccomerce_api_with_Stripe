@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseFilePipeBuilder, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CategoriesService, categoryWithChildren } from './categories.service';
 import { CreateCategoryDto } from './dtos/create_category.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { ExpressAdapter, FileInterceptor } from '@nestjs/platform-express';
 import { Category } from '@prisma/client';
 import { UpdateCategoryDto } from './dtos/update_category.dto';
 import { AtGuard } from '../guards/at.guard';
@@ -25,7 +25,19 @@ export class CategoriesController {
   @UseInterceptors(FileInterceptor('file'))
   async createCategory(
     @Body() dto: CreateCategoryDto,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+      .addFileTypeValidator({
+        fileType: /(jpg|jpeg|png|webp)$/
+      })
+      .addMaxSizeValidator({
+        maxSize: 2 * 1024 * 1024
+      })
+      .build({
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+      }),
+    )
+    file: Express.Multer.File
   ): Promise<Category>{
     return await this.categoriesService.createCategory(dto, file)
   }
@@ -38,7 +50,18 @@ export class CategoriesController {
   async updateCategory(
     @Param('id') id: string,
     @Body() dto: UpdateCategoryDto,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+      .addFileTypeValidator({
+        fileType: /(jpg|jpeg|png|webp)$/
+      })
+      .addMaxSizeValidator({
+        maxSize: 2 * 1024 * 1024
+      })
+      .build({
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+      }),
+    ) file: Express.Multer.File
   ): Promise<Category>{
     return await this.categoriesService.updateCategory(id, dto, file)
   }
