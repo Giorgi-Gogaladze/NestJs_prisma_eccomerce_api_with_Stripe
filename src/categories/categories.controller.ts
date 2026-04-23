@@ -7,17 +7,21 @@ import { UpdateCategoryDto } from './dtos/update_category.dto';
 import { AtGuard } from '../guards/at.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../custom_decorators/roles.decorator';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
+@UseInterceptors(CacheInterceptor)
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-
+  @CacheKey('categories_full_tree')
+  @CacheTTL(3600000)
   @Get()
   async getAllCategories(): Promise<categoryWithChildren[]>{
     return await this.categoriesService.getAllCategories()
   }
 
+  @CacheTTL(600000)
   @Get(':slug')
   async getCategoryBySlug(
     @Param('slug') slug: string,

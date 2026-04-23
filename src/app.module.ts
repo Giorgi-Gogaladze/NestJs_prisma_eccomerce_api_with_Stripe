@@ -5,10 +5,20 @@ import { AddressesModule } from './addresses/addresses.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 import { CouponsModule } from './coupons/coupons.module';
+import { CacheModule } from '@nestjs/cache-manager'
+import KeyvRedis from "@keyv/redis";
 
 
 @Module({
-  imports: [AuthModule, AddressesModule, CategoriesModule, CloudinaryModule, CouponsModule],
+  imports: [
+    CacheModule.register({
+      isGlobal: true,
+      stores: [
+        new KeyvRedis('redis://localhost:6379'),
+      ],
+      ttl: 600000
+    }),
+    AuthModule, AddressesModule, CategoriesModule, CloudinaryModule, CouponsModule],
   controllers: [],
   providers: [],
 })

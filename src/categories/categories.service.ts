@@ -1,10 +1,11 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dtos/create_category.dto';
 import slugify from 'slugify'
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Category } from '@prisma/client';
 import { UpdateCategoryDto } from './dtos/update_category.dto';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 export interface categoryWithChildren extends Category {
     children: categoryWithChildren[];
@@ -17,8 +18,16 @@ export interface categoryWithChildren extends Category {
 export class CategoriesService {
     constructor (
         private readonly prisma: PrismaService,
-        private readonly cloudinaryService: CloudinaryService
+        private readonly cloudinaryService: CloudinaryService, 
+        @Inject(CACHE_MANAGER) private cacheManager: Cache  // ჩავაინჯექთე ქეშმენეჯერი რომ ქესირება გამოვიყენო
     ){}
+
+    
+    //მხოლოდ იმ ფუნქციებთან, რომლებიც მონაცემებს ცვლიან
+    private async clearCache(){   
+        await this.cacheManager.del('categories_full_tree');  
+    }
+
 
 
     async createCategory(dto: CreateCategoryDto, file: Express.Multer.File): Promise<Category>{
@@ -46,7 +55,7 @@ export class CategoriesService {
             thumbnailUrl = uplaodRes.secure_url;
         }
 
-        return await this.prisma.category.create({
+        const newCat =  await this.prisma.category.create({
             data: {
                 name: dto.name,
                 description: dto.description,
@@ -55,7 +64,10 @@ export class CategoriesService {
                 thumbnailUrl: thumbnailUrl,
                 isActive: dto.isActive ?? true
             }
-        })
+        });
+
+        await this.clearCache();//(ჩემთვის) ჯერ უნდა შევინახო ცვლადში ბაზიდან დაბრუნებული მნიშვნელობა, მერე წავშალო ქეში
+        return newCat;  
 
     }
 
@@ -83,10 +95,12 @@ export class CategoriesService {
             updateData.thumbnailUrl = uploadRes.secure_url;
         }
 
-        return await this.prisma.category.update({
+        const updatedCat = await this.prisma.category.update({
             where: {id},
             data: updateData
         })
+        await this.clearCache();
+        return updatedCat;
     }
 
 
@@ -119,7 +133,8 @@ export class CategoriesService {
             await this.cloudinaryService.deleteFile(`${folder}${publicId}`)
         } */
 
-        await this.prisma.category.delete({where: {id}});
+       await this.prisma.category.delete({where: {id}});
+       await this.clearCache();
         return {
             message: 'Category removed successfully'
         } 
