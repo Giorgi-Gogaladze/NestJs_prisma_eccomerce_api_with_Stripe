@@ -27,7 +27,8 @@ export class CouponsService {
        })
     }
 
-    
+
+
     async updateCoupon(id: string, dto: UpdateCouponDto): Promise<Coupon>{
         const coupon = await this.prisma.coupon.findUnique({
             where: {id}
@@ -41,6 +42,42 @@ export class CouponsService {
         })
     }
 
+
+
+    async getAllCoupons(): Promise<Coupon[]>{
+        return await this.prisma.coupon.findMany();
+    }
+
+
+    async getCouponByCode(couponCode: string): Promise<Coupon>{
+        const coupon = await this.prisma.coupon.findUnique({
+            where: {code: couponCode}
+        });
+        
+        if(!coupon) throw new NotFoundException('Coupon not found');
+
+        return coupon;
+    }
+
+
+    async validateCoupon(couponCode: string){
+        const coupon = await this.prisma.coupon.findUnique({
+            where: {code: couponCode},
+        });
+
+        if(!coupon) throw new NotFoundException('Coupon not found');
+
+        if(!coupon.isActive) throw new BadRequestException('Coupon is disabled');
+
+        const now = new Date();
+        const expiryDate  = new Date(coupon.expiresAt);
+
+        if(now > expiryDate){
+            throw new BadRequestException('Coupon has expired')
+        }
+
+        return coupon; 
+    }
 
 
 }
