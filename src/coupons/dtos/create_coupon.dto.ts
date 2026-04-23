@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsString, Max, Min, MinLength } from "class-validator";
+import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min, MinLength } from "class-validator";
 
 export class CreateCouponDto {
     @IsNotEmpty()
@@ -15,4 +15,9 @@ export class CreateCouponDto {
     @IsNotEmpty()
     @IsDateString({}, { message: "expiresAt must be a valid ISO 8601 date string (e.g., 2026-12-31)" })
     expiresAt: string;
+
+
+    @IsBoolean()
+    @IsOptional()
+    isActive?: boolean;
 }

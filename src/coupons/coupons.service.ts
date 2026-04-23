@@ -1,7 +1,8 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCouponDto } from './dtos/create_coupon.dto';
 import { Coupon } from '@prisma/client';
+import { UpdateCouponDto } from './dtos/update_coupon.dto';
 
 @Injectable()
 export class CouponsService {
@@ -26,6 +27,19 @@ export class CouponsService {
        })
     }
 
+    
+    async updateCoupon(id: string, dto: UpdateCouponDto): Promise<Coupon>{
+        const coupon = await this.prisma.coupon.findUnique({
+            where: {id}
+        });
+
+        if(!coupon) throw new NotFoundException("Coupon not found");
+
+        return await this.prisma.coupon.update({
+            where: {id},
+            data: dto
+        })
+    }
 
 
 
