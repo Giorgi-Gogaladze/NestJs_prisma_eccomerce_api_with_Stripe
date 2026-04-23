@@ -9,24 +9,19 @@ export class CouponsService {
     constructor(private readonly prisma: PrismaService){}
 
     async createCoupon(dto: CreateCouponDto): Promise<Coupon>{
-       const existingCoupon = await this.prisma.coupon.findUnique({
-        where: { code: dto.code}
-       });
+        if(new Date(dto.expiresAt) <= new Date()){
+            throw new BadRequestException("Expiration date must be in the future");
+        }
 
-       if(existingCoupon){
-        throw new ConflictException("Coupon with that code already exist");
+       try {
+        return await this.prisma.coupon.create({data: dto })
+       } catch (error: any) {
+        if(error.code === 'P2002'){
+            throw new ConflictException("Coupon with that code already exists");
+        }
+        throw error;
        }
-
-       const expiryDate = new Date(dto.expiresAt);
-       if(expiryDate <= new Date()){
-        throw new BadRequestException("Expiration date must be in the future")
-       }
-
-       return await this.prisma.coupon.create({
-        data: {...dto}
-       })
     }
-
 
 
     async updateCoupon(id: string, dto: UpdateCouponDto): Promise<Coupon>{
@@ -36,6 +31,11 @@ export class CouponsService {
 
         if(!coupon) throw new NotFoundException("Coupon not found");
 
+        
+        if(dto.expiresAt && new Date(dto.expiresAt) <= new Date()){
+            throw new  BadRequestException("Expiration date must be in the future");
+        }
+
         return await this.prisma.coupon.update({
             where: {id},
             data: dto
@@ -44,7 +44,7 @@ export class CouponsService {
 
 
 
-    async getAllCoupons(): Promise<Coupon[]>{
+    async getAllCoupons(): Promise<Coupon[] | []>{
         return await this.prisma.coupon.findMany();
     }
 
