@@ -14,6 +14,7 @@ services:
   redis: 
     image: redis:7-alpine
     container_name: prisma_ecommerce_cache
+    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru #რედისის ქეშს დავუწესე მაქსუმალური ლიმიტი LRU(Least Recently Used) ანუ წაშლის ნაკლებად გამოყენებადებს ან ძველებს
     ports: 
     - "6379:6379"
 

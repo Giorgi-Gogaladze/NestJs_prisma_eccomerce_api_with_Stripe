@@ -7,6 +7,7 @@ model Product {
     isActive     Boolean? @default(true)
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
+    views        Int      @default(0)
 
     //relations
     categoryId String   @db.Uuid
@@ -15,7 +16,7 @@ model Product {
     reviews            Reviews[]
     product_attributes ProductAtribute[]
     product_images     ProductImage[]
-    product_variants ProductVariant[]
+    product_variants   ProductVariant[]
 
     @@map("products")
 }
