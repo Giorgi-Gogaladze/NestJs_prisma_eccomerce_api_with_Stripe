@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "dotenv/config";  //ეს და ამის მაღლა(თავში) დაწერა უზრუნველყობს,  რომ ნებისმიერ სხვა ფაილში, process.env ხელმისაწვდომი იყოს ნებისმიერ სხვა ფაილში
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { AddressesModule } from './addresses/addresses.module';

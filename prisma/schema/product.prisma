@@ -1,22 +1,27 @@
 model Product {
-    id           String   @id @default(uuid()) @db.Uuid
-    name         String
-    description  String?  @default("No description provided") @db.Text
-    brand        String
-    thumbnailUrl String?
-    isActive     Boolean? @default(true)
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
-    views        Int      @default(0)
+    id            String   @id @default(uuid()) @db.Uuid
+    name          String
+    description   String?  @default("No description provided") @db.Text
+    slug          String   @unique
+    basePrice     Decimal  @db.Decimal(10, 2)
+    discountPrice Float?
+    thumbnailUrl  String?
+    isActive      Boolean? @default(true)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    views         Int      @default(0)
 
     //relations
     categoryId String   @db.Uuid
     category   Category @relation(fields: [categoryId], references: [id])
 
-    reviews            Reviews[]
-    product_attributes ProductAtribute[]
-    product_images     ProductImage[]
-    product_variants   ProductVariant[]
+    brandId String @db.Uuid
+    brand   Brand  @relation(fields: [brandId], references: [id])
+
+    reviews          Reviews[]
+    attribute_values AttributeValue[]
+    product_images   ProductImage[]
+    product_variants ProductVariant[]
 
     @@map("products")
 }

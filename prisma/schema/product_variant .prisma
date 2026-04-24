@@ -1,20 +1,18 @@
 model ProductVariant {
-    id String @id @default(uuid())  @db.Uuid
-    sku String @unique
-    price  Decimal @db.Decimal(10, 2)
-    stock Int @default(0)
+    id    String  @id @default(uuid()) @db.Uuid
+    sku   String  @unique
+    price Decimal @db.Decimal(10, 2)
+    stock Int     @default(0)
 
     //rel
-    productId String @db.Uuid
-    product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+    productId String  @db.Uuid
+    product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-    cart_items CartItem[]
-    order_items OrderItem[]
-    inventory_logs InventoryLog[]
-    favorites Favorites[]
-
-    attributes Json?
+    cart_items       CartItem[]
+    order_items      OrderItem[]
+    inventory_logs   InventoryLog[]
+    favorites        Favorites[]
+    attribute_values AttributeValue[]
 
     @@map("product_variants")
-
 }

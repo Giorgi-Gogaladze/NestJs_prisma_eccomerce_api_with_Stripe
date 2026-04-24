@@ -3,7 +3,7 @@ model Attribute {
     name String @unique
 
     //rel
-    product_attributes ProductAtribute[]
+    attribute_values AttributeValue[]
 
-    @@map("atributes")
+    @@map("attributes")
 }
