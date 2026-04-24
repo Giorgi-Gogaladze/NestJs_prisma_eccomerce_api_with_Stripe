@@ -8,6 +8,7 @@ import { CouponsModule } from './coupons/coupons.module';
 import { CacheModule } from '@nestjs/cache-manager'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { redisStore } from 'cache-manager-redis-yet'
+import { AttributesModule } from './attributes/attributes.module';
 
 
 @Module({
@@ -27,7 +28,7 @@ import { redisStore } from 'cache-manager-redis-yet'
     },
     inject: [ConfigService]
   }), 
-  AuthModule, AddressesModule, CategoriesModule, CloudinaryModule, CouponsModule],
+  AuthModule, AddressesModule, CategoriesModule, CloudinaryModule, CouponsModule, AttributesModule],
   controllers: [],
   providers: [],
 })
