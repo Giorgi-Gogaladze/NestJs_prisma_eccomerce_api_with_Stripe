@@ -1,9 +1,10 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UploadedFile } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Brand } from '@prisma/client';
 import { CreateBrandDto } from './dtos/create_brand.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import slugify from 'slugify'
+import { UpdateBrandDto } from './dtos/update_brand.dto';
 
 @Injectable()
 export class BrandsService {
@@ -45,5 +46,41 @@ export class BrandsService {
         });
         
         return newbrand;
+    }
+
+    
+
+    async getBrands(): Promise<Brand[] | []>{
+        return await this.prisma.brand.findMany();
+    }
+
+
+
+    async updateBrand(id: string, dto: UpdateBrandDto, file: Express.Multer.File): Promise<Brand>{
+        const brand = await this.prisma.brand.findUnique({
+            where: {id}
+        });
+
+        if(!brand) throw new NotFoundException('Brand not found');
+
+        const updateData: any = {...dto};
+
+        if(dto.name){
+            updateData.slug = slugify(dto.name, {
+                lower: true,
+                strict: true,
+                replacement: '-'
+            })
+        }
+
+        if(file){
+            const uploadRes = await this.cloudinaryService.uploadFile(file);
+            updateData.logoUrl = await uploadRes.secure_url;
+        }
+
+        return await this.prisma.brand.update({
+            where: {id},
+            data: updateData
+        })
     }
 }
