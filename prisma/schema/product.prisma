@@ -16,7 +16,7 @@ model Product {
     category   Category @relation(fields: [categoryId], references: [id])
 
     brandId String @db.Uuid
-    brand   Brand  @relation(fields: [brandId], references: [id])
+    brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Restrict)
 
     reviews          Reviews[]
     attribute_values AttributeValue[]

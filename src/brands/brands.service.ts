@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException, UploadedFile } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UploadedFile } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Brand } from '@prisma/client';
 import { CreateBrandDto } from './dtos/create_brand.dto';
@@ -48,7 +48,7 @@ export class BrandsService {
         return newbrand;
     }
 
-    
+
 
     async getBrands(): Promise<Brand[] | []>{
         return await this.prisma.brand.findMany();
@@ -82,5 +82,27 @@ export class BrandsService {
             where: {id},
             data: updateData
         })
+    }
+
+
+    async deleteBrand(id: string): Promise<{message: string}>{
+        const brand = await this.prisma.brand.findUnique({
+            where: {id},
+            include: {_count: {select: {products: true}}}
+        });
+
+        if(!brand) throw new NotFoundException('Brand not found');
+
+        if(brand._count.products > 0){
+            throw new BadRequestException('Cannot delete brand that is in use by products');
+        }
+
+        await this.prisma.brand.delete({
+            where: {id}
+        });
+
+        return {
+            message: 'Brand deleted successfully'!
+        }
     }
 }
