@@ -1,8 +1,7 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAttributeDto } from './dots/create_attribute.dto';
 import { Attribute } from '@prisma/client';
-import { UpdateAddressDto } from '../addresses/dtos/update_address.dto';
 import { UpdateAttributeDto } from './dots/update_attribute.dto';
 
 @Injectable()
@@ -31,6 +30,14 @@ export class AttributesService {
             throw new NotFoundException('Attribute not found');
         }
 
+        if(dto.name){
+            const duplicate = await this.prisma.attribute.findFirst({
+                where: {name: dto.name, NOT: {id}}
+            });
+
+            if(duplicate) throw new ConflictException('Attribute name is already taken');
+        }
+
         return await this.prisma.attribute.update({
             where: {id},
             data: dto
@@ -43,6 +50,26 @@ export class AttributesService {
     }
 
 
+    async deleteAttribute(id: string): Promise<{message: string}>{
+        const att = await this.prisma.attribute.findUnique({
+            where: {id},
+            include: {_count: {select: {attribute_values: true}}}
+        })
+
+        if(!att){
+            throw new NotFoundException('Attribute not found');
+        }
+
+        if (att._count.attribute_values > 0) {
+            throw new BadRequestException('Cannot delete attribute that is in use by products');
+        }
+        
+        await this.prisma.attribute.delete({ where: {id}});
+
+        return {
+            message: 'Attribute removed successfully'
+        }
+    }
 
     
 }
