@@ -42,6 +42,12 @@ export class BrandsController {
     return await this.brandsService.getBrands();
   }
 
+  @Public() 
+  @Get(':slug')
+  async getBrand(@Param('slug') slug: string) {
+    return await this.brandsService.getBrandBySlug(slug);
+  }
+
 
   @Roles('ADMIN')
   @Patch(':id')
