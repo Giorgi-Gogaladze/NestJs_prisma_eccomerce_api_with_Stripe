@@ -4,7 +4,9 @@ model Category {
   description  String?  @default("No description provided") @db.Text
   slug         String   @unique
   thumbnailUrl String?
+  thumbnailPublicId String?
   isActive     Boolean? @default(true)
+  
 
   parentId String?    @db.Uuid
   parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])

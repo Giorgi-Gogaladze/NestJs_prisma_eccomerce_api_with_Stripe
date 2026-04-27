@@ -19,7 +19,7 @@ export class CategoriesService {
     constructor (
         private readonly prisma: PrismaService,
         private readonly cloudinaryService: CloudinaryService, 
-        @Inject(CACHE_MANAGER) private cacheManager: Cache  // ჩავაინჯექთე ქეშმენეჯერი რომ ქესირება გამოვიყენო
+        @Inject(CACHE_MANAGER) private cacheManager: Cache  // ჩავაინჯექთე ქეშმენეჯერი რომ ქეშირება გამოვიყენო
     ){}
 
     
@@ -49,10 +49,12 @@ export class CategoriesService {
         });
 
         let thumbnailUrl = null;
+        let thumbnailPublicId = null;
         if(file){
             //ქლაუდინარიზე ატვირთვა
             const uplaodRes = await this.cloudinaryService.uploadFile(file);
             thumbnailUrl = uplaodRes.secure_url;
+            thumbnailPublicId = uplaodRes.public_id;
         }
 
         const newCat =  await this.prisma.category.create({
@@ -62,7 +64,8 @@ export class CategoriesService {
                 parentId: dto.parentId || null,
                 slug: categorySlug,
                 thumbnailUrl: thumbnailUrl,
-                isActive: dto.isActive ?? true
+                isActive: dto.isActive ?? true,
+                thumbnailPublicId: thumbnailPublicId
             }
         });
 
@@ -79,7 +82,7 @@ export class CategoriesService {
         if(!exists){
             throw new NotFoundException(`Category with id: ${id} not found`);
         }
-        const updateData: any = { ...dto};
+        const updateData: Partial<Category> = { ...dto};
         
         if(dto.name){
             updateData.slug = slugify(dto.name, 
@@ -91,8 +94,13 @@ export class CategoriesService {
         }
 
         if(file){
+            if(exists.thumbnailPublicId){
+                await this.cloudinaryService.deleteFile(exists.thumbnailPublicId);
+            }
+
             const uploadRes = await this.cloudinaryService.uploadFile(file);
             updateData.thumbnailUrl = uploadRes.secure_url;
+            updateData.thumbnailPublicId = uploadRes.public_id;
         }
 
         const updatedCat = await this.prisma.category.update({
@@ -122,16 +130,9 @@ export class CategoriesService {
             throw new BadRequestException('Cannot delete category with sub-categories');
         }
 
-        //ახლა არ მინდა გამოყენება(just for refference for future projs)
-        //(ჩემთვის) url-იდან Publicid-ს ამოღება და წაშლა მაგ: "https://.../folder/image_name.jpg" -> "folder/image_name")
-        /* if(category.thumbnailUrl){
-            const parts = category.thumbnailUrl.split('/');
-            const lastPart = parts[parts.length - 1] //image_name.jpg
-            const publicId = lastPart.split('.')[0];
-
-            const folder = 'categories/'
-            await this.cloudinaryService.deleteFile(`${folder}${publicId}`)
-        } */
+        if(category.thumbnailPublicId){
+            await this.cloudinaryService.deleteFile(category.thumbnailPublicId);
+        }
 
        await this.prisma.category.delete({where: {id}});
        await this.clearCache();
@@ -143,6 +144,10 @@ export class CategoriesService {
 
 
     async getAllCategories(): Promise<categoryWithChildren[]>{ 
+
+        const cachedTree = await this.cacheManager.get<categoryWithChildren[]>('categories_full_tree')
+        if(cachedTree) return cachedTree;
+
         //(ჩემთვის) აქ ვაბრტყელებთ კატეგორიებს, რომ შემდედგ შევქმნათ ხე
         const allCategories = await this.prisma.category.findMany({
             include: {
@@ -169,6 +174,7 @@ export class CategoriesService {
             }
         };
 
+        await this.cacheManager.set('categories_full_tree', tree, 86400000)
         return tree;
     }
 
