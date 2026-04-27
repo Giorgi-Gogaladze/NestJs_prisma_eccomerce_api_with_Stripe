@@ -30,9 +30,11 @@ export class BrandsService {
         });
 
         let logoUrl = null;
+        let logoPublicId = null;
         if(file){
-            const uploadResult = this.cloudinaryService.uploadFile(file);
-            logoUrl = (await uploadResult).secure_url;
+            const uploadResult = await this.cloudinaryService.uploadFile(file);
+            logoUrl = uploadResult.secure_url;
+            logoPublicId = uploadResult.public_id;
         }
 
         const newbrand = await this.prisma.brand.create({
@@ -41,7 +43,8 @@ export class BrandsService {
                 slug: logoSlug,
                 description: dto.description,
                 isActive: dto.isActive ?? true,
-                logoUrl: logoUrl
+                logoImg: logoUrl,
+                logoPublicId: logoPublicId
             }
         });
         
@@ -63,7 +66,7 @@ export class BrandsService {
 
         if(!brand) throw new NotFoundException('Brand not found');
 
-        const updateData: any = {...dto};
+        const updateData: Partial<Brand> = {...dto};
 
         if(dto.name){
             updateData.slug = slugify(dto.name, {
@@ -74,8 +77,13 @@ export class BrandsService {
         }
 
         if(file){
+            if(brand.logoPublicId){
+                await this.cloudinaryService.deleteFile(brand.logoPublicId)
+            }
+
             const uploadRes = await this.cloudinaryService.uploadFile(file);
-            updateData.logoUrl = uploadRes.secure_url;
+            updateData.logoImg = uploadRes.secure_url;
+            updateData.logoPublicId = uploadRes.public_id;
         }
 
         return await this.prisma.brand.update({
@@ -94,7 +102,17 @@ export class BrandsService {
         if(!brand) throw new NotFoundException('Brand not found');
 
         if(brand._count.products > 0){
-            throw new BadRequestException('Cannot delete brand that is in use by products');
+            throw new BadRequestException('Can not delete brand that is in use by products');
+        }
+
+        if(brand.logoImg){
+            try {
+                if(brand.logoPublicId){
+                    await this.cloudinaryService.deleteFile(brand.logoPublicId)
+                }
+            } catch (error) {
+                console.log('Cloudinary delete failed')
+            }
         }
 
         await this.prisma.brand.delete({
@@ -102,7 +120,7 @@ export class BrandsService {
         });
 
         return {
-            message: 'Brand deleted successfully'!
+            message: 'Brand deleted successfully!'
         }
     }
 }

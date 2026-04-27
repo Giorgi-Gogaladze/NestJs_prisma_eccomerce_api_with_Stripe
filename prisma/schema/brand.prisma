@@ -5,6 +5,7 @@ model Brand {
     logoImg     String?
     description String?
     isActive    Boolean @default(true)
+    logoPublicId String?  //(ჩემთვის) ეს ქლაუდინარის ფაბლიქ აიდია
 
     products Product[]
 
