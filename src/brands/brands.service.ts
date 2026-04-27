@@ -75,7 +75,7 @@ export class BrandsService {
 
         if(file){
             const uploadRes = await this.cloudinaryService.uploadFile(file);
-            updateData.logoUrl = await uploadRes.secure_url;
+            updateData.logoUrl = uploadRes.secure_url;
         }
 
         return await this.prisma.brand.update({
