@@ -1,11 +1,10 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { CreateProductDto } from './dtos/create_product.dto';
 import slugify from 'slugify'
-import { Product } from '@prisma/client';
-import { connect } from 'http2';
+
 
 @Injectable()
 export class ProductsService {
@@ -36,7 +35,8 @@ export class ProductsService {
         if(files && files.length > 0){
             const uploadRes = await Promise.all(
                 files.map(file =>  this.cloudinaryService.uploadFile(file))
-            )
+            );
+
             thumbnail = uploadRes[0].secure_url;
             thumbKey = uploadRes[0].public_id;
 
@@ -72,7 +72,25 @@ export class ProductsService {
                 brand: true
             }
 
+        });
+        return newProduct;
+    }
+
+
+    async deleteProduct(id: string): Promise<{message: string}>{
+        const product = await this.prisma.product.findUnique({
+            where: {id}
+        });
+
+        if(!product){
+            throw new NotFoundException(`Product with id ${id} not found`)
+        }
+
+        await this.cloudinaryService.deleteFile(product.thumbnailPublicId!);
+        await this.prisma.product.delete({
+            where: {id}
         })
+        return {message: 'Product deleted successfully'}
     }
 
 }
