@@ -6,6 +6,8 @@ import { CreateProductDto } from './dtos/create_product.dto';
 import slugify from 'slugify'
 import { UpdateProductDto } from './dtos/update_product.dto';
 import { Product } from '@prisma/client';
+import { QueryDto } from './dtos/query.dto';
+import { contains } from 'class-validator';
 
 //არ დამავიწყდეს: ისაქთივზე შევამოწმო სანამ დავაბრუნებ. და ისაქთივის შეცვლის ფუნქცია შევქმნა
  
@@ -187,6 +189,68 @@ export class ProductsService {
         });
 
         return updatedProduct;
+    }
+
+
+
+    async getAllProducts(queryDto: QueryDto): Promise<Product[] | []>{
+        const {brand, category, limit = 10, maxPrice, minPrice, page = 1, search, sortBy = 'createdAt', sortOrder = 'asc'} = queryDto;
+
+        const where: any = {
+            isActive: true, 
+        }
+
+        if(search){
+            where.OR = [
+                {name: {contains: search, mode: 'insensitive'}},
+                {description: {contains: search, mode: 'insensitive'}},
+            ];
+        }
+
+        if(category){
+            where.category = {
+                OR: [
+                    {id: category.match(/^[0-9a-fA-F-]{36}$/) ? category: undefined},
+                    {slug: category},
+                ].filter(Boolean)
+            }
+        };
+
+        if(brand){
+            where.brand = {
+                OR: [
+                    { id: brand.match(/^[0-9a-fA-F-]{36}$/) ? brand : undefined },
+                    { slug: brand }
+                ].filter(Boolean)
+            }
+        };
+
+        if(minPrice !== undefined || maxPrice !== undefined){
+            where.basePrice = {
+                ...(minPrice !== undefined && {gte: Number(minPrice)}),
+                ...(maxPrice !== undefined && {lte: Number(maxPrice)}),
+            }
+        }
+
+        const skip = (page - 1) * limit;
+
+
+        return await this.prisma.product.findMany({
+            where,
+            include: {
+                brand: true,
+                category: true,
+                product_images: {
+                    take: 1
+                }
+            },
+            orderBy: {
+                [sortBy]: sortOrder,   
+            },
+            skip: skip,
+            take: Number(limit)
+        })
+
     }
 
 }
