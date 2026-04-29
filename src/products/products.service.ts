@@ -1,13 +1,12 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { CreateProductDto } from './dtos/create_product.dto';
 import slugify from 'slugify'
 import { UpdateProductDto } from './dtos/update_product.dto';
 import { Product } from '@prisma/client';
 import { QueryDto } from './dtos/query.dto';
-import { contains } from 'class-validator';
 
 //არ დამავიწყდეს: ისაქთივზე შევამოწმო სანამ დავაბრუნებ. და ისაქთივის შეცვლის ფუნქცია შევქმნა
  
@@ -18,6 +17,12 @@ export class ProductsService {
         private readonly cloudinaryService: CloudinaryService,
         @Inject(CACHE_MANAGER) private cacheManager: Cache 
     ){}
+
+
+    private async clearCache(){
+        await this.cacheManager.clear()
+    }
+
 
     async createProduct(dto: CreateProductDto, files: Express.Multer.File[]){
         const [existingProduct, category, brand] =await Promise.all([
@@ -75,6 +80,7 @@ export class ProductsService {
                 brand: true
             }
         });
+        await this.clearCache()
         return newProduct;
     }
 
@@ -104,6 +110,7 @@ export class ProductsService {
         await this.prisma.product.delete({
             where: {id}
         })
+        await this.clearCache();
         return {message: 'Product deleted successfully'}
     }
 
@@ -187,7 +194,7 @@ export class ProductsService {
                 brand: true
             }
         });
-
+        await this.clearCache()
         return updatedProduct;
     }
 
@@ -196,9 +203,12 @@ export class ProductsService {
     async getAllProducts(queryDto: QueryDto): Promise<Product[] | []>{
         const {brand, category, limit = 10, maxPrice, minPrice, page = 1, search, sortBy = 'createdAt', sortOrder = 'asc'} = queryDto;
 
-        const where: any = {
-            isActive: true, 
-        }
+        const cacheKey = `products:${search}-${category}-${brand}-${minPrice}-${maxPrice}-${page}-${limit}-${sortBy}-${sortOrder}`;
+        const cachedProducts = await this.cacheManager.get<Product[]>(cacheKey);
+        if(cachedProducts) return cachedProducts as Product[];
+
+
+        const where: any = { isActive: true}
 
         if(search){
             where.OR = [
@@ -235,7 +245,7 @@ export class ProductsService {
         const skip = (page - 1) * limit;
 
 
-        return await this.prisma.product.findMany({
+        const res = await this.prisma.product.findMany({
             where,
             include: {
                 brand: true,
@@ -249,8 +259,14 @@ export class ProductsService {
             },
             skip: skip,
             take: Number(limit)
-        })
+        });
+
+        await this.cacheManager.set(cacheKey, res, 3600000);
+        return res;
 
     }
+
+
+    
 
 }
