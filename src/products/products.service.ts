@@ -5,7 +5,7 @@ import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { CreateProductDto } from './dtos/create_product.dto';
 import slugify from 'slugify'
 import { UpdateProductDto } from './dtos/update_product.dto';
-import { Product } from '@prisma/client';
+import { Prisma, Product } from '@prisma/client';
 import { QueryDto } from './dtos/query.dto';
 import { ViewsService } from '../views/views.service';
 
@@ -203,7 +203,7 @@ export class ProductsService {
 
 
 
-    async getAllProducts(queryDto: QueryDto): Promise<Product[]>{
+    async getAllProducts(queryDto: QueryDto, isAdmin: boolean): Promise<Product[]>{
         const {brand, category, limit = 10, maxPrice, minPrice, page = 1, search, sortBy = 'createdAt', sortOrder = 'asc'} = queryDto;
 
         const cacheKey = `products:${search}-${category}-${brand}-${minPrice}-${maxPrice}-${page}-${limit}-${sortBy}-${sortOrder}`;
@@ -211,7 +211,7 @@ export class ProductsService {
         if(cachedProducts) return cachedProducts as Product[];
 
 
-        const where: any = { isActive: true}
+        const where: Prisma.ProductWhereInput = isAdmin ? {} : {isActive: true};
 
         if(search){
             where.OR = [
@@ -251,8 +251,8 @@ export class ProductsService {
         const res = await this.prisma.product.findMany({
             where,
             include: {
-                brand: true,
-                category: true,
+                brand: {select: {name: true}},
+                category: {select: {name: true}},
                 product_images: {
                     take: 1
                 },
@@ -273,11 +273,11 @@ export class ProductsService {
     }
 
 
-    async getProductById(id:string, ip: string): Promise<Product>{
+    async getProductById(id:string, ip: string, isAdmin: boolean): Promise<Product>{
         const product = await this.prisma.product.findUnique({
             where: {
                 id, 
-                isActive: true,
+                ...(isAdmin ? {} : {isActive: true})
             },
             include: {
                 brand: true,
@@ -293,16 +293,23 @@ export class ProductsService {
         this.viewsService.incrementView(id, ip);
 
         return product;
-
-
     }
 
 
+    async changeIsActiveStatus(id: string, status: boolean): Promise<Product>{
+        try {
+            return await this.prisma.product.update({
+                where: {id},
+                data: {isActive: status}
+            })
+        } catch (error: any) {
+            if(error.code === 'P2025'){
+                throw new NotFoundException('Product not found');
+            }
+            return error;
+        }
+    }
 
 
-    //getprodById
-    //get all products, even inactives
-    //changeisactivestatus
-    
 
 }
