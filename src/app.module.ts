@@ -13,6 +13,7 @@ import { BrandsModule } from './brands/brands.module';
 import { ProductsModule } from './products/products.module';
 import { ScheduleModule } from "@nestjs/schedule";
 import { ViewsModule } from "./views/views.module";
+import { ReviewsModule } from './reviews/reviews.module';
 
 
 @Module({
@@ -33,7 +34,7 @@ import { ViewsModule } from "./views/views.module";
     inject: [ConfigService]
   }), 
   AuthModule, AddressesModule, CategoriesModule, CloudinaryModule, CouponsModule, AttributesModule,  BrandsModule, ProductsModule, ViewsModule, 
-  ScheduleModule.forRoot(),
+  ScheduleModule.forRoot(), ReviewsModule,
 ],
   controllers: [],
   providers: [],

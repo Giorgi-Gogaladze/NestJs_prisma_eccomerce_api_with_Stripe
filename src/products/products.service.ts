@@ -284,13 +284,15 @@ export class ProductsService {
                 category: true,
                 product_images: true,
                 attribute_values: true,
-                reviews: true,
+                reviews: {take: 5, orderBy: {createdAt: 'desc'}},
             }
         });
 
         if(!product) throw new NotFoundException('Product not found or is not in active status');
 
-        this.viewsService.incrementView(id, ip);
+        if(!isAdmin){
+            this.viewsService.incrementView(id, ip);
+        }
 
         return product;
     }
@@ -309,7 +311,5 @@ export class ProductsService {
             return error;
         }
     }
-
-
 
 }

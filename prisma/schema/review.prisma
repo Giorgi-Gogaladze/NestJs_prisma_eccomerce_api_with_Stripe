@@ -1,7 +1,7 @@
 model Reviews {
   id        String   @id @default(uuid()) @db.Uuid
-  rating    Decimal  @db.Decimal(2, 1)
-  comment   String
+  rating    Decimal?  @db.Decimal(2, 1)
+  comment   String?
   createdAt DateTime @default(now())
 
   userId String @db.Uuid

@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Reviews" ALTER COLUMN "rating" DROP NOT NULL,
+ALTER COLUMN "comment" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "products" ADD COLUMN     "avgRating" DOUBLE PRECISION NOT NULL DEFAULT 0;
