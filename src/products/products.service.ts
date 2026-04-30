@@ -7,15 +7,18 @@ import slugify from 'slugify'
 import { UpdateProductDto } from './dtos/update_product.dto';
 import { Product } from '@prisma/client';
 import { QueryDto } from './dtos/query.dto';
+import { ViewsService } from '../views/views.service';
 
 //არ დამავიწყდეს: ისაქთივზე შევამოწმო სანამ დავაბრუნებ. და ისაქთივის შეცვლის ფუნქცია შევქმნა
+//არ დამავიწყდეს ნახვების გაზრდის ლოგიკა
  
 @Injectable()
 export class ProductsService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly cloudinaryService: CloudinaryService,
-        @Inject(CACHE_MANAGER) private cacheManager: Cache 
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
+        private viewsService: ViewsService
     ){}
 
 
@@ -116,7 +119,7 @@ export class ProductsService {
 
 
 
-    async updateProduct(id: string, dto: UpdateProductDto, files: Express.Multer.File[]): Promise<Product>{
+    async updateProduct(id: string, dto: UpdateProductDto, files?: Express.Multer.File[]): Promise<Product>{
         const [existingProduct, brand, category] = await Promise.all([
             this.prisma.product.findFirst({where: {name: dto.name}}),
             this.prisma.brand.findUnique({where: {id: dto.brandId}}),
@@ -200,7 +203,7 @@ export class ProductsService {
 
 
 
-    async getAllProducts(queryDto: QueryDto): Promise<Product[] | []>{
+    async getAllProducts(queryDto: QueryDto): Promise<Product[]>{
         const {brand, category, limit = 10, maxPrice, minPrice, page = 1, search, sortBy = 'createdAt', sortOrder = 'asc'} = queryDto;
 
         const cacheKey = `products:${search}-${category}-${brand}-${minPrice}-${maxPrice}-${page}-${limit}-${sortBy}-${sortOrder}`;
@@ -252,21 +255,54 @@ export class ProductsService {
                 category: true,
                 product_images: {
                     take: 1
+                },
+                _count: {
+                    select: {reviews: true}
                 }
             },
             orderBy: {
-                [sortBy]: sortOrder,   
+                [sortBy]: sortOrder.toLowerCase() === 'desc' ? 'desc' : 'asc'   
             },
             skip: skip,
             take: Number(limit)
         });
 
-        await this.cacheManager.set(cacheKey, res, 3600000);
+        await this.cacheManager.set(cacheKey, res, 3600);
         return res;
 
     }
 
 
+    async getProductById(id:string, ip: string): Promise<Product>{
+        const product = await this.prisma.product.findUnique({
+            where: {
+                id, 
+                isActive: true,
+            },
+            include: {
+                brand: true,
+                category: true,
+                product_images: true,
+                attribute_values: true,
+                reviews: true,
+            }
+        });
+
+        if(!product) throw new NotFoundException('Product not found or is not in active status');
+
+        this.viewsService.incrementView(id, ip);
+
+        return product;
+
+
+    }
+
+
+
+
+    //getprodById
+    //get all products, even inactives
+    //changeisactivestatus
     
 
 }

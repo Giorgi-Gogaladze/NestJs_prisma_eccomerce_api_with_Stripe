@@ -11,6 +11,8 @@ import { redisStore } from 'cache-manager-redis-yet'
 import { AttributesModule } from './attributes/attributes.module';
 import { BrandsModule } from './brands/brands.module';
 import { ProductsModule } from './products/products.module';
+import { ScheduleModule } from "@nestjs/schedule";
+import { ViewsModule } from "./views/views.module";
 
 
 @Module({
@@ -22,7 +24,7 @@ import { ProductsModule } from './products/products.module';
     useFactory: async (configService: ConfigService) => {
       const store = await redisStore({
         url: configService.get('REDIS_URL'),  //.env_დან
-        ttl: 600000
+        ttl: 600
       });
       return {
         store: store as any
@@ -30,7 +32,9 @@ import { ProductsModule } from './products/products.module';
     },
     inject: [ConfigService]
   }), 
-  AuthModule, AddressesModule, CategoriesModule, CloudinaryModule, CouponsModule, AttributesModule,  BrandsModule, ProductsModule],
+  AuthModule, AddressesModule, CategoriesModule, CloudinaryModule, CouponsModule, AttributesModule,  BrandsModule, ProductsModule, ViewsModule, 
+  ScheduleModule.forRoot(),
+],
   controllers: [],
   providers: [],
 })

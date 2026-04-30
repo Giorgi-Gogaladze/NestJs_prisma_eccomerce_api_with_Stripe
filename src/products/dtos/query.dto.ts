@@ -11,7 +11,8 @@ export enum SortBy {
     CREATED_AT = 'createdAt',
     VIEWS = 'views',
     NAME = 'name',
-    BRAND = 'brand'
+    BRAND = 'brand',
+    RATING = 'rating'
 }
 
 export class QueryDto {

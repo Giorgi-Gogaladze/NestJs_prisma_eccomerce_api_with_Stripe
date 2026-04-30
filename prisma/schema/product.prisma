@@ -11,6 +11,8 @@ model Product {
     createdAt         DateTime @default(now())
     updatedAt         DateTime @updatedAt
     views             Int      @default(0)
+    avgRating         Float    @default(0)
+    reviewCount       Int      @default(0)
 
     //relations
     categoryId String   @db.Uuid
