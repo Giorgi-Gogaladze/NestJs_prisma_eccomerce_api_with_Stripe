@@ -13,7 +13,22 @@ export class AtGuard extends AuthGuard('jwt'){
             context.getHandler(),
             context.getClass()
         ]);
-        if(isPublic) return true;
+
+        const request = context.switchToHttp().getRequest();
+        const hasAuthHeader = Boolean(
+            request.headers?.authorization ||
+            request.cookies?.['access_token']
+        );
+
+        if(isPublic){
+            if(!hasAuthHeader) return true;
+
+            try {
+                return super.canActivate(context);
+            } catch {
+                return true;
+            }
+        }
 
         return super.canActivate(context);
     }

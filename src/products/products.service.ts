@@ -8,6 +8,7 @@ import { UpdateProductDto } from './dtos/update_product.dto';
 import { Prisma, Product } from '@prisma/client';
 import { QueryDto } from './dtos/query.dto';
 import { ViewsService } from '../views/views.service';
+import { ChangeStatusDto } from './dtos/change_status.dto';
 
 //არ დამავიწყდეს: ისაქთივზე შევამოწმო სანამ დავაბრუნებ. და ისაქთივის შეცვლის ფუნქცია შევქმნა
 //არ დამავიწყდეს ნახვების გაზრდის ლოგიკა
@@ -298,17 +299,18 @@ export class ProductsService {
     }
 
 
-    async changeIsActiveStatus(id: string, status: boolean): Promise<Product>{
+    async changeIsActiveStatus(id: string, dto: ChangeStatusDto): Promise<Product>{
+        const { isActive } = dto;
         try {
             return await this.prisma.product.update({
                 where: {id},
-                data: {isActive: status}
+                data: {isActive}
             })
         } catch (error: any) {
             if(error.code === 'P2025'){
                 throw new NotFoundException('Product not found');
             }
-            return error;
+            throw error;
         }
     }
 
