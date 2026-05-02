@@ -3,9 +3,10 @@ import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
 import { PrismaService } from '../prisma/prisma.service';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { ViewsModule } from '../views/views.module';
 
 @Module({
-  imports: [CloudinaryModule],
+  imports: [CloudinaryModule, ViewsModule],
   controllers: [ProductsController],
   providers: [ProductsService, PrismaService],
 })

@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpStatus, Ip, Param, ParseFilePipeBuilder, Patch, Post, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import { CreateProductDto } from './dtos/create_product.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { AtGuard } from '../guards/at.guard';
@@ -43,6 +43,19 @@ export class ProductsController {
   }
 
 
+  
+  @Get()
+  @Public()
+  async getAllProducts(
+    @Query() queryDto: QueryDto,
+    @User() user: any,
+  ): Promise<Product[]> {
+    const isAdmin = Boolean(user?.role?.includes('ADMIN'));
+    return await this.productsService.getAllProducts(queryDto, isAdmin);
+  }
+
+
+
   @Delete(':id')
   async deleteProduct(
     @Param('id') id: string
@@ -50,6 +63,7 @@ export class ProductsController {
     return await this.productsService.deleteProduct(id);
   }
 
+  
 
   @Patch(':id')
   @UseInterceptors(FilesInterceptor('product_images'))
@@ -76,19 +90,8 @@ export class ProductsController {
 
 
 
-  @Get()
-  @Public()
-  async getAllProducts(
-    @Query() queryDto: QueryDto,
-    @User() user: any,
-  ): Promise<Product[]> {
-    const isAdmin = Boolean(user?.role?.includes('ADMIN'));
-    return await this.productsService.getAllProducts(queryDto, isAdmin);
-  }
-
-
   @Get(':id')
-  @Public()
+  @Public()  
   async getProductbyid(
     @Param('id') id: string,
     @User() user: any,

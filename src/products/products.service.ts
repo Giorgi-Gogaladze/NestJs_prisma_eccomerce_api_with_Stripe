@@ -121,16 +121,28 @@ export class ProductsService {
 
 
     async updateProduct(id: string, dto: UpdateProductDto, files?: Express.Multer.File[]): Promise<Product>{
-        const [existingProduct, brand, category] = await Promise.all([
-            this.prisma.product.findFirst({where: {name: dto.name}}),
-            this.prisma.brand.findUnique({where: {id: dto.brandId}}),
-            this.prisma.category.findUnique({where: {id: dto.categoryId}})
+        const [currentProduct, existingProduct] = await Promise.all([
+            this.prisma.product.findUnique({ where: { id } }),
+            dto.name ? this.prisma.product.findFirst({ where: { name: dto.name } }) : Promise.resolve(null),
         ]);
 
-        if(!existingProduct) throw new ConflictException(`Product with name ${dto.name} already exist `);
-        if(!brand) throw new NotFoundException('Brand not found');
-        if(!category) throw new NotFoundException('Category not found');
+        if (!currentProduct) {
+            throw new NotFoundException(`Product with id ${id} not found`);
+        }
 
+        if (existingProduct && existingProduct.id !== id) {
+            throw new ConflictException(`Product with name ${dto.name} already exist `);
+        }
+
+        if (dto.brandId) {
+            const brand = await this.prisma.brand.findUnique({ where: { id: dto.brandId } });
+            if (!brand) throw new NotFoundException('Brand not found');
+        }
+
+        if (dto.categoryId) {
+            const category = await this.prisma.category.findUnique({ where: { id: dto.categoryId } });
+            if (!category) throw new NotFoundException('Category not found');
+        }
 
         let newSlug: string | null = null;
         if(dto.name){
@@ -155,8 +167,8 @@ export class ProductsService {
                 this.cloudinaryService.deleteFile(img.imagePublicId)
             );
 
-            if(existingProduct.thumbnailPublicId){
-                deleteOldImages.push(this.cloudinaryService.deleteFile(existingProduct.thumbnailPublicId));
+            if (currentProduct.thumbnailPublicId) {
+                deleteOldImages.push(this.cloudinaryService.deleteFile(currentProduct.thumbnailPublicId));
             }
 
             await Promise.all(deleteOldImages);
@@ -187,7 +199,9 @@ export class ProductsService {
                 ...(dto.basePrice !== undefined && {basePrice: dto.basePrice}),
                 ...(dto.description && {description: dto.description}),
                 ...(dto.discountPercent !== undefined && {discountPercent: dto.discountPercent}),
-                ...(dto.isActive && {isActive: dto.isActive}),
+                ...(dto.isActive !== undefined && {isActive: dto.isActive}),
+                ...(dto.brandId && {brand: { connect: { id: dto.brandId } }}),
+                ...(dto.categoryId && {category: { connect: { id: dto.categoryId } }}),
                 ...(thumbnail && {thumbnailUrl: thumbnail}),
                 ...(thumbnailPublicId && {thumbnailPublicId: thumbnailPublicId}),
                 ...(images.length > 0 && {product_images: {create: images}})
@@ -207,7 +221,7 @@ export class ProductsService {
     async getAllProducts(queryDto: QueryDto, isAdmin: boolean): Promise<Product[]>{
         const {brand, category, limit = 10, maxPrice, minPrice, page = 1, search, sortBy = 'createdAt', sortOrder = 'asc'} = queryDto;
 
-        const cacheKey = `products:${search}-${category}-${brand}-${minPrice}-${maxPrice}-${page}-${limit}-${sortBy}-${sortOrder}`;
+        const cacheKey = `products:${isAdmin ? 'admin' : 'user'}:${search}-${category}-${brand}-${minPrice}-${maxPrice}-${page}-${limit}-${sortBy}-${sortOrder}`;
         const cachedProducts = await this.cacheManager.get<Product[]>(cacheKey);
         if(cachedProducts) return cachedProducts as Product[];
 
@@ -265,7 +279,7 @@ export class ProductsService {
                 [sortBy]: sortOrder.toLowerCase() === 'desc' ? 'desc' : 'asc'   
             },
             skip: skip,
-            take: Number(limit)
+            take: limit
         });
 
         await this.cacheManager.set(cacheKey, res, 3600);

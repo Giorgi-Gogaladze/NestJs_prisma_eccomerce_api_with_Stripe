@@ -49,7 +49,7 @@ export class ViewsService{
     }
 
 
-    //ვიყენებთ ქრონს ავტომატური სინქრონიზაციისთვის
+    //ვიყენებთ ქრონს ავტომატური სინქრონიზაციისთვის(რედისთან ერთად ვამუავებთ)
     @Cron(CronExpression.EVERY_10_MINUTES)
     async syncToDb(){
 

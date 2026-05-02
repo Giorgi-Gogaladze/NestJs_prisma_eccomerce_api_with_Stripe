@@ -15,13 +15,13 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @CacheKey('categories_full_tree')
-  @CacheTTL(3600000)
+  @CacheTTL(3600)
   @Get()
   async getAllCategories(): Promise<categoryWithChildren[]>{
     return await this.categoriesService.getAllCategories()
   }
 
-  @CacheTTL(600000)
+  @CacheTTL(3600)
   @Get(':slug')
   async getCategoryBySlug(
     @Param('slug') slug: string,
