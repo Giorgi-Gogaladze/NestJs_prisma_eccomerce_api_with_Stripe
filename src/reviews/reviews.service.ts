@@ -48,9 +48,16 @@ export class ReviewsService {
     }
 
 
-    async deleteReview(reviewId: string): Promise<{message: string}>{
-        const review = await this.prisma.reviews.findUnique({ where: {id: reviewId}});
+    async deleteReview(reviewId: string, userId: string, isAdmin: boolean): Promise<{message: string}>{
+        const review = await this.prisma.reviews.findFirst({ 
+            where: {
+                id: reviewId, 
+                ...(isAdmin ? {} : {userId})
+            }
+        });
+
         if(!review) throw new NotFoundException(`Review with id ${reviewId} not found`);
+
         await this.prisma.reviews.delete({ where: {id: reviewId}});
         return {message: 'Review deleted successfully'};
     }
@@ -68,6 +75,12 @@ export class ReviewsService {
                         firstName: true,
                         lastName: true
                     }
+                },
+                product: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
                 }
             }
         })
@@ -75,7 +88,27 @@ export class ReviewsService {
 
 
 
-
+    async getuserReviews(userId: string): Promise<Reviews[]>{
+        return await this.prisma.reviews.findMany({
+            where: {userId},
+            include: { 
+                user: {
+                    select: {
+                        id: true,   
+                        email: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                },  
+                product: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+            }
+        })
+    }
 
 
 
