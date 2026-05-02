@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpStatus, Ip, Param, ParseFilePipeBuilder, Patch, Post, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { CreateProductDto } from './dtos/create_product.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { AtGuard } from '../guards/at.guard';
@@ -63,7 +63,7 @@ export class ProductsController {
     return await this.productsService.deleteProduct(id);
   }
 
-  
+
 
   @Patch(':id')
   @UseInterceptors(FilesInterceptor('product_images'))
