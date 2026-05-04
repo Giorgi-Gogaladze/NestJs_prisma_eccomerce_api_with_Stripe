@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateReviewDto } from './dtos/create_review.dto';
 import { Reviews } from '@prisma/client';
 import { UpdateReviewDto } from './dtos/update_review.dto';
+import { ReviewsQueryDto } from './dtos/reviews_query.dto';
 
 @Injectable()
 export class ReviewsService {
@@ -64,31 +65,53 @@ export class ReviewsService {
 
 
 
-    async getProductReviews(productId: string): Promise<Reviews[]>{
-        return await this.prisma.reviews.findMany({
-            where: {productId},
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        email: true,
-                        firstName: true,
-                        lastName: true
-                    }
+    async getProductReviews(productId: string, query: ReviewsQueryDto){
+        const { limit = 10, page = 1, sortBy } = query;
+        const skip = (page - 1) * limit;
+
+        const [reviews, total] = await Promise.all([
+            this.prisma.reviews.findMany({
+                where: {productId},
+                skip,
+                take: limit,
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            email: true,
+                            firstName: true,
+                            lastName: true
+                        }
+                    },
+                    product: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    },
                 },
-                product: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                }
+                orderBy: {
+                    createdAt: sortBy === 'newest' ? 'desc' : 'asc'
+                },
+            }),
+            this.prisma.reviews.count({ where: { productId }})
+        ]);
+
+        return {
+            data: reviews,
+            meta: {
+                totalCount: total,
+                page,
+                limit,
+                hasnextPage: skip + reviews.length < total
             }
-        })
+        }
     }
 
 
+    
 
-    async getuserReviews(userId: string): Promise<Reviews[]>{
+    async getUserReviews(userId: string): Promise<Reviews[]>{
         return await this.prisma.reviews.findMany({
             where: {userId},
             include: { 
