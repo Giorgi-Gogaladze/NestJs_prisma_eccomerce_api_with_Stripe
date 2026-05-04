@@ -26,6 +26,7 @@ export class ReviewsService {
                 comment: dto.comment
             }
         });
+        await this.updateAvgRating(dto.productId);
         return review;
     }
 
@@ -39,13 +40,17 @@ export class ReviewsService {
         });
         if(!review) throw new Error('Review not found');
 
-        return await this.prisma.reviews.update({
+        const updateReview = await this.prisma.reviews.update({
             where: {
                 id: reviewId, 
                 userId
             },
             data:  {...dto}
-        })
+        });
+        if( dto.rating !== undefined){
+            await this.updateAvgRating(review.productId);
+        }
+        return updateReview;
     }
 
 
@@ -111,7 +116,7 @@ export class ReviewsService {
 
     
 
-    async getUserReviews(userId: string): Promise<Reviews[]>{
+    async getMyReviews(userId: string): Promise<Reviews[]>{
         return await this.prisma.reviews.findMany({
             where: {userId},
             include: { 
