@@ -1,8 +1,12 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAttributeDto } from './dots/create_attribute.dto';
-import { Attribute } from '@prisma/client';
+import { Attribute, Prisma } from '@prisma/client';
 import { UpdateAttributeDto } from './dots/update_attribute.dto';
+
+export type AttributesWithValues = Prisma.AttributeGetPayload<{
+    include: {attribute_values: true}
+}>
 
 @Injectable()
 export class AttributesService {
@@ -45,8 +49,24 @@ export class AttributesService {
     }
 
 
-    async getAttributes(): Promise<Attribute[] | []>{
-        return await this.prisma.attribute.findMany();
+    async getAttributes(): Promise<AttributesWithValues[]>{
+        return await this.prisma.attribute.findMany({
+            include: {
+                attribute_values:true
+            }
+        });
+    }
+
+    async getAttribute(id: string): Promise<AttributesWithValues>{
+        const att = await this.prisma.attribute.findUnique({
+            where: {id},
+            include: {
+                attribute_values: true
+            }
+        })
+        if(!att) throw new NotFoundException('Attribute not found');
+
+        return att
     }
 
 

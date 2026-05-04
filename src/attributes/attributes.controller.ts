@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { AttributesService } from './attributes.service';
+import { AttributesService, AttributesWithValues } from './attributes.service';
 import { CreateAttributeDto } from './dots/create_attribute.dto';
 import { Attribute } from '@prisma/client';
 import { UpdateAttributeDto } from './dots/update_attribute.dto';
@@ -24,9 +24,18 @@ export class AttributesController {
 
   @Public()
   @Get()
-  async getAttributes(): Promise<Attribute[] | []>{
+  async getAttributes(): Promise<AttributesWithValues[]>{
     return await this.attributesService.getAttributes();
   }
+
+  @Public()
+  @Get(':id')
+  async getAttribute(
+    @Param('id') id: string
+  ): Promise<AttributesWithValues>{
+    return await this.attributesService.getAttribute(id);
+  }
+
 
 
   @Patch(':id')
