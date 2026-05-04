@@ -49,7 +49,7 @@ export class ProductsController {
   async getAllProducts(
     @Query() queryDto: QueryDto,
     @User() user: any,
-  ): Promise<Product[]> {
+  ) {
     const isAdmin = Boolean(user?.role?.includes('ADMIN'));
     return await this.productsService.getAllProducts(queryDto, isAdmin);
   }

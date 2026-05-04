@@ -218,7 +218,7 @@ export class ProductsService {
 
 
 
-    async getAllProducts(queryDto: QueryDto, isAdmin: boolean): Promise<Product[]>{
+    async getAllProducts(queryDto: QueryDto, isAdmin: boolean){
         const {brand, category, limit = 10, maxPrice, minPrice, page = 1, search, sortBy = 'createdAt', sortOrder = 'asc'} = queryDto;
 
         const cacheKey = `products:${isAdmin ? 'admin' : 'user'}:${search}-${category}-${brand}-${minPrice}-${maxPrice}-${page}-${limit}-${sortBy}-${sortOrder}`;
@@ -263,27 +263,39 @@ export class ProductsService {
         const skip = (page - 1) * limit;
 
 
-        const res = await this.prisma.product.findMany({
-            where,
-            include: {
-                brand: {select: {name: true}},
-                category: {select: {name: true}},
-                product_images: {
-                    take: 1
+        const [products, total ]  = await Promise.all([
+            this.prisma.product.findMany({
+                where,
+                include: {
+                    brand: {select: {name: true}},
+                    category: {select: {name: true}},
+                    product_images: {
+                        take: 1
+                    },
+                    _count: {
+                        select: {reviews: true}
+                    }
                 },
-                _count: {
-                    select: {reviews: true}
-                }
-            },
-            orderBy: {
-                [sortBy]: sortOrder.toLowerCase() === 'desc' ? 'desc' : 'asc'   
-            },
-            skip: skip,
-            take: limit
-        });
+                orderBy: {
+                    [sortBy]: sortOrder.toLowerCase() === 'desc' ? 'desc' : 'asc'   
+                },
+                skip: skip,
+                take: limit
+            }),
+            this.prisma.product.count({where})
+        ]);
 
-        await this.cacheManager.set(cacheKey, res, 3600);
-        return res;
+        await this.cacheManager.set(cacheKey, products, 3600);
+
+        return {
+            data: products,
+            meta: {
+                totalCount: total,
+                page,
+                limit,
+                hasNextPage: skip + products.length < total
+            }
+        };
 
     }
 
