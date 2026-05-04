@@ -310,7 +310,6 @@ export class ProductsService {
                 brand: true,
                 category: true,
                 product_images: true,
-                attribute_values: true,
                 reviews: {take: 5, orderBy: {createdAt: 'desc'}},
             }
         });

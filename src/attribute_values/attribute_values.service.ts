@@ -23,6 +23,13 @@ export class AttributeValuesService {
             data: { 
                 value: dto.value,
                 attributeId
+            },
+            include: {
+                attribute: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
     }
