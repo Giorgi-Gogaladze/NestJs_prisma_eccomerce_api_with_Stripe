@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { createAttValueDto } from './dtos/create_att_value.dto';
-import { updateAttValueDto } from './dtos/update_att_value.dto';
+import { UpdateAttValueDto } from './dtos/update_att_value.dto';
 import { AttributeValue } from '@prisma/client';
 import { AttributesWithValues } from '../attributes/attributes.service';
 
@@ -27,14 +27,26 @@ export class AttributeValuesService {
         })
     }
 
-    async updateAttValue(attributeValId: string, dto: updateAttValueDto): Promise<AttributeValue>{
-        const attribute = await this.prisma.attributeValue.findUnique({ where: { id: attributeValId }});
-        if(!attribute) throw new NotFoundException('Attribute value not found');
+    async updateAttValue(attributeValId: string, dto: UpdateAttValueDto): Promise<AttributeValue>{
+        const attributeVal = await this.prisma.attributeValue.findUnique({ where: { id: attributeValId }});
+        if(!attributeVal) throw new NotFoundException('Attribute value not found');
+
+        if(dto.value && dto.value !== attributeVal.value){
+            const duplicate = await this.prisma.attributeValue.findFirst({
+                where: {
+                    value: dto.value,
+                    attributeId: attributeVal.attributeId,
+                    NOT: {id: attributeValId}
+                }
+            });
+            
+            if(duplicate){
+                throw new ConflictException(`Value "${dto.value}" already exists for this attribute`);
+            }
+        }
 
         return await this.prisma.attributeValue.update({
-            where: {
-                id: attributeValId,
-            },
+            where: {id: attributeValId},
             data: {...dto}
         })
     }
