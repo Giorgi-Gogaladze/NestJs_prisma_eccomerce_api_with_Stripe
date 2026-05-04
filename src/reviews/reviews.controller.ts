@@ -23,7 +23,6 @@ export class ReviewsController {
     return await this.reviewsService.getProductReviews(id, query);
   }
 
-  @Public()
   @Get()
   async getMyReviews(
     @User() user: any 
@@ -31,25 +30,28 @@ export class ReviewsController {
     return await this.reviewsService.getMyReviews(user?.sub,)
   }
 
-  @Post()
+  @Post('/products/:productId/reviews')
   async createReview(
+    @Param('productId') productId: string,
     @User() user: any,
     @Body() dto: CreateReviewDto
-  ): Promise<Reviews>{
-    return await this.reviewsService.createReview(user?.sub, dto)
+  ): Promise<Reviews | {message: string}>{
+    const isAdmin = Boolean(user?.role.includes('ADMIN'))
+    return await this.reviewsService.createReview(user?.sub, dto, isAdmin, productId)
   }
 
 
-  @Patch(':reviewId')
+  @Patch(':productId/reviews/:reviewId')
   async updateReview(
+    @Param('productId') productId: string,
     @Param('reviewId') reviewId: string,
     @Body() dto: UpdateReviewDto,
     @User() user: any
   ): Promise<Reviews>{
-    return await this.reviewsService.updateReview(reviewId, dto, user?.sub )
+    return await this.reviewsService.updateReview(reviewId, dto, user?.sub, productId )
   }
 
-  @Delete(':reviewId')
+  @Delete('/:reviewId')
   async deleteReview(
     @Param('reviewId') reviewId: string,
     @User() user: any

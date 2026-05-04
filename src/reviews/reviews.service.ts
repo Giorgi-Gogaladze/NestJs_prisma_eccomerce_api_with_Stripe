@@ -9,11 +9,17 @@ import { ReviewsQueryDto } from './dtos/reviews_query.dto';
 export class ReviewsService {
     constructor(private readonly prisma: PrismaService){}
 
-    async createReview(userId: string, dto: CreateReviewDto): Promise<Reviews>{
+    async createReview(userId: string, dto: CreateReviewDto, isAdmin: boolean, productId: string): Promise< Reviews | { message: string }>{
+        if(isAdmin){
+            return {
+                message: 'Admin cant create review'
+            }
+        };
+
         const existingReview = await this.prisma.reviews.findFirst({
             where: {
                 userId, 
-                productId: dto.productId
+                productId,
             }
         });
         if(existingReview) throw new Error('You have already reviewed this product');
@@ -21,30 +27,27 @@ export class ReviewsService {
         const review = await this.prisma.reviews.create({
             data: {
                 userId,
-                productId: dto.productId,
+                productId,
                 rating: dto.rating,
                 comment: dto.comment
             }
         });
-        await this.updateAvgRating(dto.productId);
+        await this.updateAvgRating(productId);
         return review;
     }
 
 
-    async updateReview(reviewId: string, dto: UpdateReviewDto, userId: string): Promise<Reviews>{
+    async updateReview(reviewId: string, dto: UpdateReviewDto, userId: string, productId: string): Promise<Reviews>{
         const review = await this.prisma.reviews.findFirst({where:  
             {
             id: reviewId,
-            userId
+            userId,
             }
         });
         if(!review) throw new Error('Review not found');
 
         const updateReview = await this.prisma.reviews.update({
-            where: {
-                id: reviewId, 
-                userId
-            },
+            where: { id: reviewId },
             data:  {...dto}
         });
         if( dto.rating !== undefined){
@@ -141,21 +144,19 @@ export class ReviewsService {
 
 
     async updateAvgRating(productId: string){
-        const reviews = await this.prisma.reviews.findMany({
+        const reviews = await this.prisma.reviews.aggregate({
             where: {productId},
-            select: {rating: true}
+            _avg: {rating: true},
+            _count: {rating: true}
         });
 
-        const reviewCount = reviews.length;
-
-        const averageRating = reviewCount > 0 
-        ? reviews.reduce((sum, rev) => sum + Number(rev.rating), 0) / reviewCount
-        : 0;
+        const avgRating = reviews._avg.rating || 0;
+        const reviewCount = reviews._count.rating || 0;
 
         await this.prisma.product.update({
             where: {id: productId},
             data: {
-                avgRating: parseFloat(averageRating.toFixed(1)),
+                avgRating: parseFloat(avgRating.toFixed(1)),
                 reviewCount: reviewCount
             }
         })

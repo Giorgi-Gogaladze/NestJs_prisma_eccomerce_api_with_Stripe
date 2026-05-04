@@ -1,7 +1,7 @@
 import { IsNotEmpty, isNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class CreateReviewDto {
-    @IsOptional()
+    @IsNotEmpty()
     @IsNumber()
     @Min(1, {message: 'Rating must be at least 1'})
     @Max(5, {message: 'Rating must be at most 5'})
@@ -10,8 +10,4 @@ export class CreateReviewDto {
     @IsOptional()
     @IsString()
     comment?: string;
-
-    @IsString()
-    @IsNotEmpty()
-    productId: string;
 }
