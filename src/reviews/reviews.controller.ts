@@ -1,16 +1,20 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { ReviewsQueryDto } from './dtos/reviews_query.dto';
 import { Reviews } from '@prisma/client';
 import { User } from '../custom_decorators/user.decorator';
 import { CreateReviewDto } from './dtos/create_review.dto';
 import { UpdateReviewDto } from './dtos/update_review.dto';
-import { arrayNotEmpty } from 'class-validator';
+import { AtGuard } from '../guards/at.guard';
+import { Public } from '../custom_decorators/public.decorator';
 
+
+@UseGuards(AtGuard)
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
+  @Public()
   @Get('/:id')
   async getProductReviews(
     @Param('id') id: string,
@@ -19,7 +23,7 @@ export class ReviewsController {
     return await this.reviewsService.getProductReviews(id, query);
   }
 
-
+  @Public()
   @Get()
   async getMyReviews(
     @User() user: any 
@@ -36,7 +40,7 @@ export class ReviewsController {
   }
 
 
-  @Patch('reviewId')
+  @Patch(':reviewId')
   async updateReview(
     @Param('reviewId') reviewId: string,
     @Body() dto: UpdateReviewDto,
@@ -45,12 +49,12 @@ export class ReviewsController {
     return await this.reviewsService.updateReview(reviewId, dto, user?.sub )
   }
 
-  @Delete('reviewId')
+  @Delete(':reviewId')
   async deleteReview(
     @Param('reviewId') reviewId: string,
     @User() user: any
   ): Promise<{message: string}>{
-     const isAdmin = Boolean(user?.role?.include('ADMIN'));
+     const isAdmin = Boolean(user?.role?.includes('ADMIN'));
     return await this.reviewsService.deleteReview(reviewId, user?.sub, isAdmin)
   }
 

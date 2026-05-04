@@ -8,28 +8,21 @@ export class AtGuard extends AuthGuard('jwt'){
         super();
     }
 
-    canActivate(context: ExecutionContext){
+    async canActivate(context: ExecutionContext){
         const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
             context.getHandler(),
             context.getClass()
         ]);
 
-        const request = context.switchToHttp().getRequest();
-        const hasAuthHeader = Boolean(
-            request.headers?.authorization ||
-            request.cookies?.['access_token']
-        );
-
         if(isPublic){
-            if(!hasAuthHeader) return true;
-
             try {
-                return super.canActivate(context);
+                const canActivate = await super.canActivate(context); //თუ ფაბლიქია,მაგრამ დალოგინებული არა,  super.canactivate ისვრის ერორს, ვიჭერთ ქეჩიტ და მაინც ვაბრუნებთ თრუს.(ეს რთავს ნებას დაულოგინებელ იუზერს)  
+                return canActivate as boolean;
             } catch {
                 return true;
             }
         }
 
-        return super.canActivate(context);
+        return super.canActivate(context) as Promise<boolean>;
     }
 }
