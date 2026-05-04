@@ -22,7 +22,6 @@ model Product {
     brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Restrict)
 
     reviews          Reviews[]
-    attribute_values AttributeValue[]
     product_images   ProductImage[]
     product_variants ProductVariant[]
 

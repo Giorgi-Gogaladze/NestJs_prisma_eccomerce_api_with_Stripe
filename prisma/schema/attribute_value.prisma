@@ -5,11 +5,9 @@ model AttributeValue {
     attributeId String    @db.Uuid
     attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
 
-    productId String  @db.Uuid
-    product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
     variants ProductVariant[]
 
-    @@unique([value, attributeId, productId])
+    @@unique([value, attributeId])
     @@map("attribute_values")
 }

@@ -15,12 +15,12 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Public()
-  @Get('/:id')
+  @Get('/:productId')
   async getProductReviews(
-    @Param('id') id: string,
+    @Param('productId') productId: string,
     @Query() query: ReviewsQueryDto
   ){
-    return await this.reviewsService.getProductReviews(id, query);
+    return await this.reviewsService.getProductReviews(productId, query);
   }
 
   @Get()

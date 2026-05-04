@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReviewDto } from './dtos/create_review.dto';
 import { Reviews } from '@prisma/client';
@@ -22,7 +22,7 @@ export class ReviewsService {
                 productId,
             }
         });
-        if(existingReview) throw new Error('You have already reviewed this product');
+        if(existingReview) throw new ConflictException('You have already reviewed this product.')
 
         const review = await this.prisma.reviews.create({
             data: {
