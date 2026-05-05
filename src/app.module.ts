@@ -15,6 +15,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { ViewsModule } from "./views/views.module";
 import { ReviewsModule } from './reviews/reviews.module';
 import { AttributeValuesModule } from './attribute_values/attribute_values.module';
+import { ProductVariantsModule } from './product_variants/product_variants.module';
 
 
 @Module({
@@ -35,7 +36,7 @@ import { AttributeValuesModule } from './attribute_values/attribute_values.modul
     inject: [ConfigService]
   }), 
   AuthModule, AddressesModule, CategoriesModule, CloudinaryModule, CouponsModule, AttributesModule,  BrandsModule, ProductsModule, ViewsModule, 
-  ScheduleModule.forRoot(), ReviewsModule, AttributeValuesModule,
+  ScheduleModule.forRoot(), ReviewsModule, AttributeValuesModule, ProductVariantsModule,
 ],
   controllers: [],
   providers: [],

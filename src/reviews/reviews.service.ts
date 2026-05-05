@@ -143,7 +143,7 @@ export class ReviewsService {
 
 
 
-    async updateAvgRating(productId: string){
+   private async updateAvgRating(productId: string){
         const reviews = await this.prisma.reviews.aggregate({
             where: {productId},
             _avg: {rating: true},
