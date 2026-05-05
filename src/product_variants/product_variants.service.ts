@@ -100,7 +100,7 @@ export class ProductVariantsService {
     }
 
 
-    async deleteVariant(variantId: string){
+    async deleteVariant(variantId: string): Promise<{message: string}>{
         const variant = await this.prisma.productVariant.findUnique({
             where: {id: variantId}
         });
@@ -110,6 +110,10 @@ export class ProductVariantsService {
         await this.prisma.productVariant.delete({
             where: {id: variantId}
         });
+
+        return {
+            message: 'Variant deleted successfully'
+        }
     }
 
 
