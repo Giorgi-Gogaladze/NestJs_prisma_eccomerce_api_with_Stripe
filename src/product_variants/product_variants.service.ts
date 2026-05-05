@@ -1,7 +1,10 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { createProductVariantDto } from './dtos/create_product_variant.dto';
-import { Product } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { UpdateProductVariantDto } from './dtos/update_product_vaiant.dto';
+
+ export type ProductWithVariants = Prisma.ProductVariantGetPayload<{}>
 
 @Injectable()
 export class ProductVariantsService {
@@ -22,7 +25,7 @@ export class ProductVariantsService {
 
 
 
-    async createProductVariant(productId: string, dto: createProductVariantDto){
+    async createProductVariant(productId: string, dto: createProductVariantDto): Promise<ProductWithVariants>{
         const product = await this.prisma.product.findUnique({
             where: { id: productId},
             include: {
@@ -37,22 +40,20 @@ export class ProductVariantsService {
 
         const isDuplicate = product.product_variants.some((variant) => {
             const existingValuesId =variant.attribute_values.map(v => v.id);
-
             return (
                 existingValuesId.length === dto.attributeValueIds.length && 
                 existingValuesId.every((id) => dto.attributeValueIds.includes(id))
             )
         });
 
+        if(isDuplicate) throw new ConflictException('A variant with these attribtue values already exist');
+
         const selectedValues = await this.prisma.attributeValue.findMany({
             where: {id: { in: dto.attributeValueIds}} 
         });
         const valNames = selectedValues.map(v => v.value);
 
-        const sku  = this.generateSku(valNames, product.name)
-
-
-        if(isDuplicate) throw new ConflictException('A variant with these attribtue values already exist');
+        const sku  = this.generateSku(valNames, product.name);
 
         return await this.prisma.productVariant.create({
             data: {
@@ -62,10 +63,44 @@ export class ProductVariantsService {
                 productId,
                 attribute_values: {
                     connect: dto.attributeValueIds.map((id) => ({ id }))
-                }
+                },
             }
         })
     };
+
+
+
+    async getVariantById(variantId: string): Promise<ProductWithVariants>{
+        const variant = await this.prisma.productVariant.findUnique({
+            where: {id: variantId},
+            include: {
+                attribute_values: {
+                    include: {attribute: true}
+                }
+            }
+        });
+
+        if(!variant) throw new NotFoundException("Variant not found");
+
+        return variant;
+    }
+
+
+    async updateVariant(variantId: string, dto: UpdateProductVariantDto){
+        const variant = await this.prisma.productVariant.findUnique({
+            where: {id: variantId}
+        });
+
+        if(!variant) throw new NotFoundException('Variant not found');
+
+        return await this.prisma.productVariant.update({
+            where: {id: variantId},
+            data: { ...dto}
+        });
+    }
+
+
+
 
 
 }

@@ -311,6 +311,13 @@ export class ProductsService {
                 category: true,
                 product_images: true,
                 reviews: {take: 5, orderBy: {createdAt: 'desc'}},
+                product_variants: {
+                    include: {
+                        attribute_values: {
+                            include: {attribute: true}
+                        }
+                    }
+                }
             }
         });
 
