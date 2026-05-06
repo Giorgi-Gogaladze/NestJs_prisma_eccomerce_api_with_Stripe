@@ -17,6 +17,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { AttributeValuesModule } from './attribute_values/attribute_values.module';
 import { ProductVariantsModule } from './product_variants/product_variants.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { PrismaModule } from './prisma/prisma.module';
     },
     inject: [ConfigService]
   }),   PrismaModule,  AuthModule, AddressesModule, CategoriesModule, CloudinaryModule, CouponsModule, AttributesModule,  BrandsModule, ProductsModule, ViewsModule, 
-  ScheduleModule.forRoot(), ReviewsModule, AttributeValuesModule, ProductVariantsModule
+  ScheduleModule.forRoot(), ReviewsModule, AttributeValuesModule, ProductVariantsModule, FavoritesModule
 ],
   controllers: [],
   providers: [],
