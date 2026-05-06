@@ -11,6 +11,13 @@ export class FavoritesService {
             where: {id: variantId}
         });
         if(!variant) throw new NotFoundException('Product variant not found');
+        const existingFavorite = await this.prisma.favorites.findFirst({
+            where: {
+                userId, 
+                variantId
+            }
+        });
+        if(existingFavorite) throw new NotFoundException('Product variant already in favorites');
 
         return this.prisma.favorites.create({
             data: {
@@ -18,9 +25,14 @@ export class FavoritesService {
                 variantId,
             },
             include: {
-                variant: {
+                FavoriteProductVariants: {
                     include: {
-                        product: true
+                        product: true,
+                        attribute_values: {
+                            include: {
+                                attribute: true
+                            }
+                        }
                     }
                 }
             }
@@ -36,6 +48,7 @@ export class FavoritesService {
             }
         });
         if(!favorite) throw new NotFoundException('Favorite product not found');
+        
         await this.prisma.favorites.delete({
             where: { id: favorite.id }
         });
@@ -47,9 +60,14 @@ export class FavoritesService {
         return this.prisma.favorites.findMany({
             where: { userId },
             include: {
-                variant: {
+                FavoriteProductVariants: {
                     include: {
-                        product: true
+                        product: true,
+                        attribute_values: {
+                            include: {
+                                attribute: true
+                            }
+                        }
                     }
                 }
             }
