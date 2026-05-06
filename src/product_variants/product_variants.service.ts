@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { createProductVariantDto } from './dtos/create_product_variant.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, ProductVariant } from '@prisma/client';
 import { UpdateProductVariantDto } from './dtos/update_product_vaiant.dto';
 
  export type ProductWithVariants = Prisma.ProductVariantGetPayload<{}>
@@ -20,12 +20,12 @@ export class ProductVariantsService {
 
         const randomSufix = Math.floor(1000 + Math.random() * 9000);
 
-        return `${name}-${valueParts}-${randomSufix}`;
+        return (`${name}-${valueParts}-${randomSufix}`).trim();
     }
 
 
 
-    async createProductVariant(productId: string, dto: createProductVariantDto): Promise<ProductWithVariants>{
+    async createProductVariant(productId: string, dto: createProductVariantDto){
         const product = await this.prisma.product.findUnique({
             where: { id: productId},
             include: {
@@ -55,7 +55,7 @@ export class ProductVariantsService {
 
         const sku  = this.generateSku(valNames, product.name);
 
-        return await this.prisma.productVariant.create({
+        await this.prisma.productVariant.create({
             data: {
                 sku: sku,
                 price: dto.price,
@@ -66,14 +66,17 @@ export class ProductVariantsService {
                 },
             }
         })
+
+        return await this.getProductById(productId);
     };
 
 
 
-    async getVariantById(variantId: string): Promise<ProductWithVariants>{
+    async getVariantById(variantId: string): Promise<ProductVariant>{
         const variant = await this.prisma.productVariant.findUnique({
             where: {id: variantId},
             include: {
+                product: true,
                 attribute_values: {
                     include: {attribute: true}
                 }
@@ -93,10 +96,35 @@ export class ProductVariantsService {
 
         if(!variant) throw new NotFoundException('Variant not found');
 
-        return await this.prisma.productVariant.update({
+        await this.prisma.productVariant.update({
             where: {id: variantId},
             data: { ...dto}
         });
+
+        return await this.prisma.productVariant.findUnique({
+            where: {id: variantId},
+            include: {
+                attribute_values: {
+                    include: {attribute: true}
+                }
+            }
+        });
+    }
+
+
+    async getProductAllVariants(productId: string){
+        return await this.prisma.product.findMany({
+            where: {id:productId},
+            include: {
+                product_variants: {
+                    include: {
+                        attribute_values:{
+                            include: {attribute: true}
+                        }
+                    }
+                }
+            }
+        })
     }
 
 
@@ -117,7 +145,19 @@ export class ProductVariantsService {
     }
 
 
-
-
+    private async getProductById(productId: string){
+        return await this.prisma.product.findUnique({
+            where: {id: productId},
+            include: {
+                product_variants: {
+                    include: {
+                        attribute_values: {
+                            include: {attribute: true}
+                        }   
+                    }
+                }
+            }
+    })        
+}
 
 }
