@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthStrategy } from '../strategies/auth.strategy';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [
@@ -13,9 +13,10 @@ import { PrismaService } from '../prisma/prisma.service';
         secret: process.env.JWT_SECRET || 'default_secret',
         signOptions: {expiresIn: '1h'},
       })
-    })
+    }),
+    PrismaModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthStrategy, PrismaService],
+  providers: [AuthService, AuthStrategy],
 })
 export class AuthModule {}

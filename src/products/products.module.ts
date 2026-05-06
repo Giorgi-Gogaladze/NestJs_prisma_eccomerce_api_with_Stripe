@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaModule } from '../prisma/prisma.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { ViewsModule } from '../views/views.module';
 
 @Module({
-  imports: [CloudinaryModule, ViewsModule],
+  imports: [CloudinaryModule, ViewsModule, PrismaModule],
   controllers: [ProductsController],
-  providers: [ProductsService, PrismaService],
+  providers: [ProductsService],
 })
 export class ProductsModule {}
