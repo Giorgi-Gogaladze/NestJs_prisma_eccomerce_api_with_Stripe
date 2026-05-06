@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ProductVariantsService, ProductWithVariants } from './product_variants.service';
 import { createProductVariantDto } from './dtos/create_product_variant.dto';
 import { UpdateProductVariantDto } from './dtos/update_product_vaiant.dto';
@@ -6,8 +6,10 @@ import { AtGuard } from '../guards/at.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../custom_decorators/roles.decorator';
 import { ProductVariant, Role } from '@prisma/client';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('product-variants')
+@UseInterceptors(CacheInterceptor)
 @UseGuards(AtGuard, RolesGuard)
 export class ProductVariantsController {
   constructor(private readonly productVariantsService: ProductVariantsService) {}
