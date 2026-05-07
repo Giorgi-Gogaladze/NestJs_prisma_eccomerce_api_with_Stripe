@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { CategoriesModule } from './categories/categories.module';
-import { CloudinaryModule } from "./cloudinary/cloudinary.module";
+import { CloudinaryModule } from "./shared/cloudinary/cloudinary.module";
 import { CouponsModule } from './coupons/coupons.module';
 import { CacheModule } from '@nestjs/cache-manager'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -16,7 +16,7 @@ import { ViewsModule } from "./views/views.module";
 import { ReviewsModule } from './reviews/reviews.module';
 import { AttributeValuesModule } from './attribute_values/attribute_values.module';
 import { ProductVariantsModule } from './product_variants/product_variants.module';
-import { PrismaModule } from './prisma/prisma.module';
+import { PrismaModule } from './shared/prisma/prisma.module';
 import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({

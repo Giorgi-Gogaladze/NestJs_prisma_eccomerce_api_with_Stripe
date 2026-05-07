@@ -7,7 +7,7 @@ import slugify from 'slugify'
 import { UpdateProductDto } from './dtos/update_product.dto';
 import { Prisma, Product } from '@prisma/client';
 import { QueryDto } from './dtos/query.dto';
-import { ViewsService } from '../views/views.service';
+import { ViewsService } from '../../engagements/views/views.service';
 import { ChangeStatusDto } from './dtos/change_status.dto';
 
 //არ დამავიწყდეს: ისაქთივზე შევამოწმო სანამ დავაბრუნებ. და ისაქთივის შეცვლის ფუნქცია შევქმნა
