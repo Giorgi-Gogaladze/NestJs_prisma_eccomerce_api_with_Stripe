@@ -1,12 +1,12 @@
 import { Controller, Post, Body, Patch, Get, UseGuards} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { SignupDto } from './dto/signup.dto';
 import { SigninDto } from './dto/signin.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from '../custom_decorators/user.decorator';
-import { Public } from '../custom_decorators/public.decorator';
-import { AtGuard } from '../guards/at.guard';
+import { User } from '../../../shared/custom_decorators/user.decorator';
+import { Public } from '../../../shared/custom_decorators/public.decorator';
+import { AtGuard } from '../../../shared/guards/at.guard';
 
 
 @Controller('auth')

@@ -4,9 +4,9 @@ import { CreateCategoryDto } from './dtos/create_category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Category } from '@prisma/client';
 import { UpdateCategoryDto } from './dtos/update_category.dto';
-import { AtGuard } from '../guards/at.guard';
-import { RolesGuard } from '../guards/roles.guard';
-import { Roles } from '../custom_decorators/roles.decorator';
+import { AtGuard } from '../../../shared/guards/at.guard';
+import { RolesGuard } from '../../../shared/guards/roles.guard';
+import { Roles } from '../../../shared/custom_decorators/roles.decorator';
 import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @UseInterceptors(CacheInterceptor)

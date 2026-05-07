@@ -3,14 +3,14 @@ import { ProductsService } from './products.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { CreateProductDto } from './dtos/create_product.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { AtGuard } from '../guards/at.guard';
-import { RolesGuard } from '../guards/roles.guard';
-import { Roles } from '../custom_decorators/roles.decorator';
+import { AtGuard } from '../../../shared/guards/at.guard';
+import { RolesGuard } from '../../../shared/guards/roles.guard';
+import { Roles } from '../../../shared/custom_decorators/roles.decorator';
 import { Product } from '@prisma/client';
 import { UpdateProductDto } from './dtos/update_product.dto';
 import { QueryDto } from './dtos/query.dto';
-import { Public } from '../custom_decorators/public.decorator';
-import { User } from '../custom_decorators/user.decorator';
+import { Public } from '../../../shared/custom_decorators/public.decorator';
+import { User } from '../../../shared/custom_decorators/user.decorator';
 import { ChangeStatusDto } from './dtos/change_status.dto';
 
 @UseGuards(AtGuard, RolesGuard)

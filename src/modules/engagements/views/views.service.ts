@@ -1,7 +1,7 @@
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
 import { Inject, Injectable, Logger, ParseIntPipe } from "@nestjs/common";
 import { Redis } from 'ioredis'
-import { PrismaService } from "../prisma/prisma.service";
+import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { Cron, CronExpression } from "@nestjs/schedule";
 
 

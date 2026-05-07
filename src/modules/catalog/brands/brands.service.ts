@@ -1,8 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException, UploadedFile } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { Brand } from '@prisma/client';
 import { CreateBrandDto } from './dtos/create_brand.dto';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CloudinaryService } from '../../../shared/cloudinary/cloudinary.service';
 import slugify from 'slugify'
 import { UpdateBrandDto } from './dtos/update_brand.dto';
 

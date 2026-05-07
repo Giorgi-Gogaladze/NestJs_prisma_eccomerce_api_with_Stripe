@@ -1,8 +1,8 @@
 import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { CreateCategoryDto } from './dtos/create_category.dto';
 import slugify from 'slugify'
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CloudinaryService } from '../../../shared/cloudinary/cloudinary.service';
 import { Category } from '@prisma/client';
 import { UpdateCategoryDto } from './dtos/update_category.dto';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';

@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { AddressesService } from './addresses.service';
-import { User } from '../custom_decorators/user.decorator';
+import { User } from '../../../shared/custom_decorators/user.decorator';
 import { CreateAddressDto } from './dtos/create_address.dto';
 import { Address } from '@prisma/client';
 import { UpdateAddressDto } from './dtos/update_address.dto';
-import { AtGuard } from '../guards/at.guard';
+import { AtGuard } from '../../../shared/guards/at.guard';
 
 @UseGuards(AtGuard)
 @Controller('address')

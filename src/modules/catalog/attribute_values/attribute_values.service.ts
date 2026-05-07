@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { createAttValueDto } from './dtos/create_att_value.dto';
 import { UpdateAttValueDto } from './dtos/update_att_value.dto';
 import { AttributeValue } from '@prisma/client';

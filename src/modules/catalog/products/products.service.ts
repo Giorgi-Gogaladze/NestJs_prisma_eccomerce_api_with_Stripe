@@ -1,6 +1,6 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { PrismaService } from '../../../shared/prisma/prisma.service';
+import { CloudinaryService } from '../../../shared/cloudinary/cloudinary.service';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { CreateProductDto } from './dtos/create_product.dto';
 import slugify from 'slugify'

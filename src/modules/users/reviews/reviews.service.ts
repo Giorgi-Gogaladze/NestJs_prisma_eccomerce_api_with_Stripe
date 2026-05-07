@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { CreateReviewDto } from './dtos/create_review.dto';
 import { Reviews } from '@prisma/client';
 import { UpdateReviewDto } from './dtos/update_review.dto';

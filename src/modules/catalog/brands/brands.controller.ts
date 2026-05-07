@@ -4,10 +4,10 @@ import { CreateBrandDto } from './dtos/create_brand.dto';
 import { Brand } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateBrandDto } from './dtos/update_brand.dto';
-import { AtGuard } from '../guards/at.guard';
-import { RolesGuard } from '../guards/roles.guard';
-import { Roles } from '../custom_decorators/roles.decorator';
-import { Public } from '../custom_decorators/public.decorator';
+import { AtGuard } from '../../../shared/guards/at.guard';
+import { RolesGuard } from '../../../shared/guards/roles.guard';
+import { Roles } from '../../../shared/custom_decorators/roles.decorator';
+import { Public } from '../../../shared/custom_decorators/public.decorator';
 
 @UseGuards(AtGuard, RolesGuard)
 @Controller('brands')

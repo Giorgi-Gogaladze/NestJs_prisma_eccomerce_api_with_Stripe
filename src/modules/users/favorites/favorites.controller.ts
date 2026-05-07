@@ -1,8 +1,8 @@
 import { Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
-import { User } from '../custom_decorators/user.decorator';
+import { User } from '../../../shared/custom_decorators/user.decorator';
 import { Favorites } from '@prisma/client';
-import { AtGuard } from '../guards/at.guard';
+import { AtGuard } from '../../../shared/guards/at.guard';
 
 @Controller('favorites')
 @UseGuards(AtGuard)

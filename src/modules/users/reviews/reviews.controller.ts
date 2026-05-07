@@ -2,11 +2,11 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } f
 import { ReviewsService } from './reviews.service';
 import { ReviewsQueryDto } from './dtos/reviews_query.dto';
 import { Reviews } from '@prisma/client';
-import { User } from '../custom_decorators/user.decorator';
+import { User } from '../../../shared/custom_decorators/user.decorator';
 import { CreateReviewDto } from './dtos/create_review.dto';
 import { UpdateReviewDto } from './dtos/update_review.dto';
-import { AtGuard } from '../guards/at.guard';
-import { Public } from '../custom_decorators/public.decorator';
+import { AtGuard } from '../../../shared/guards/at.guard';
+import { Public } from '../../../shared/custom_decorators/public.decorator';
 
 
 @UseGuards(AtGuard)

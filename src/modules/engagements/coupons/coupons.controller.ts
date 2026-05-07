@@ -3,9 +3,9 @@ import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dtos/create_coupon.dto';
 import { Coupon } from '@prisma/client';
 import { UpdateCouponDto } from './dtos/update_coupon.dto';
-import { AtGuard } from '../guards/at.guard';
-import { RolesGuard } from '../guards/roles.guard';
-import { Roles } from '../custom_decorators/roles.decorator';
+import { AtGuard } from '../../../shared/guards/at.guard';
+import { RolesGuard } from '../../../shared/guards/roles.guard';
+import { Roles } from '../../../shared/custom_decorators/roles.decorator';
 
 @UseGuards(AtGuard, RolesGuard)
 @Controller('coupons')

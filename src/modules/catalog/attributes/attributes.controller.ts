@@ -3,10 +3,10 @@ import { AttributesService, AttributesWithValues } from './attributes.service';
 import { CreateAttributeDto } from './dots/create_attribute.dto';
 import { Attribute } from '@prisma/client';
 import { UpdateAttributeDto } from './dots/update_attribute.dto';
-import { AtGuard } from '../guards/at.guard';
-import { RolesGuard } from '../guards/roles.guard';
-import { Roles } from '../custom_decorators/roles.decorator';
-import { Public } from '../custom_decorators/public.decorator';
+import { AtGuard } from '../../../shared/guards/at.guard';
+import { RolesGuard } from '../../../shared/guards/roles.guard';
+import { Roles } from '../../../shared/custom_decorators/roles.decorator';
+import { Public } from '../../../shared/custom_decorators/public.decorator';
 
 @UseGuards(AtGuard, RolesGuard)
 @Roles('ADMIN')

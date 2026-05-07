@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
-import { PrismaModule } from '../prisma/prisma.module';
-import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { PrismaModule } from '../../../shared/prisma/prisma.module';
+import { CloudinaryModule } from '../../../shared/cloudinary/cloudinary.module';
 import { ViewsModule } from '../../engagements/views/views.module';
 
 @Module({
