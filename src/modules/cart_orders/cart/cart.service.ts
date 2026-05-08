@@ -20,7 +20,6 @@ export class CartService {
                 }
             }
         });
-
         if(!cart){
             const newCart = await this.prisma.cart.create({
                 data: {userId},
@@ -129,6 +128,28 @@ export class CartService {
 
 
 
-    //remove item
-    //ჯოით ვალიდაცია არ დამავიწყდეს
+    async removeItemFromCart(userId: string, itemId: string): Promise<{message: string}>{
+        const deleteResult = await this.prisma.cartItem.deleteMany({
+            where: {
+                id: itemId,
+                cart: { userId }
+            },
+        });
+        
+        if(deleteResult.count === 0){
+            throw new NotFoundException('Item not found in your cart')
+        }
+        return {message: 'Item removed Successfully'};
+    }
+
+
+
+    async clearMyCart(userId: string){
+        await this.prisma.cartItem.deleteMany({
+            where: {
+                cart: {userId}
+            }
+        })
+        return {message: 'Cart cleared successfully'}
+    }
 }
