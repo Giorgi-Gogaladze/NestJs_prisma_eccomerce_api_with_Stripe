@@ -18,6 +18,8 @@ model Order {
 
   couponId String? @db.Uuid
   coupon Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  
+  inventory_logs InventoryLog[]
 
   payment Payment?
 

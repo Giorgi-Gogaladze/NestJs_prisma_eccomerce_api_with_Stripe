@@ -19,7 +19,7 @@ export class CartController {
   }
 
   @Post()
-  async addItemToDto(
+  async addItemToCart(
     @User() user: any,
     @Body() dto: AddItemToCartDto
   ): Promise<ReturnType<typeof this.getMyCart>>{
