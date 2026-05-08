@@ -83,7 +83,7 @@ export class CartService {
 
 
 
-    async updateCartItemQuantity(usreId: string, itemId: string, dto: UpdateCartItemQuantityDto){
+    async updateCartItemQuantity(usreId: string, itemId: string, dto: UpdateCartItemQuantityDto): Promise<Cart>{
         const mycart = await this.getMyCart(usreId);
         if(!mycart) throw new ConflictException('Cart not found');
 
