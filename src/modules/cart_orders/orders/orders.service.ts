@@ -1,7 +1,16 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { createOrderDto } from './dtos/create_order.dto';
 import { CartService } from '../cart/cart.service';
+import { Prisma } from '@prisma/client';
+
+export type OrderWithItems = Prisma.OrderGetPayload<{
+    include: {
+        order_items: {
+            include: { variant: true}
+        }
+    }
+}>
 
 @Injectable()
 export class OrdersService {
@@ -15,7 +24,7 @@ export class OrdersService {
     }
 
 
-    async createOrder(userId: string, dto: createOrderDto){
+    async createOrder(userId: string, dto: createOrderDto): Promise<OrderWithItems>{
          const myCart = await this.cartService.getMyCart(userId);
         if(myCart.cart_items.length === 0){
             throw new BadRequestException('Your cart is empty')
@@ -39,7 +48,7 @@ export class OrdersService {
                 };
 
                 totalAmount += Number(item.variant.price) * item.quantity;
-                if(appliedCouon){
+                if(appliedCouon !== null){
                    totalAmount -= (Number(appliedCouon.discountPerc) * totalAmount) / 100;
                 }
             }
@@ -52,6 +61,13 @@ export class OrdersService {
                     addressId: address.id,
                     userId,
                     couponId: appliedCouon?.id
+                },
+                include: {
+                    order_items: {
+                        include: {
+                            variant: true
+                        }
+                    }
                 }
             });
 
@@ -65,7 +81,7 @@ export class OrdersService {
                 }
             });
 
-            const updatedVariant = await tsx.productVariant.update({
+            await tsx.productVariant.update({
              where: {id: item.variantId},
              data : {stock: {decrement: item.quantity}}
             })
@@ -75,5 +91,40 @@ export class OrdersService {
            return order;
         });
 
+    }
+
+
+    async getMyOrders(userId: string){
+        const orders = await this.prisma.order.findMany({
+            where: {userId},
+            orderBy: {createdAt: 'desc'},
+            include: {
+                _count: {
+                    select: { order_items: true}
+                }
+            }
+        });
+        if(orders.length === 0){
+           throw new NotFoundException('You have no orders yet') 
+        }
+    }
+
+
+    async getOrderById(orderId: string, userId: string){
+        const order = await this.prisma.order.findFirst({
+            where: {
+                id: orderId,
+                userId
+            },
+            include: {
+                order_items:{
+                    include: { variant: true}
+                },
+                address: true,
+                coupon: true
+            }
+        });
+        if(!order) throw new NotFoundException('Order not found or access denied');
+        return order;
     }
 }
