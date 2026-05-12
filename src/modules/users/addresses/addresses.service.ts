@@ -62,7 +62,7 @@ export class AddressesService {
         });
 
         if(addresses.length === 0){
-            return {message: 'User sas not address'}
+            return {message: 'User has not address'}
         } else{
             return addresses;
         }
@@ -88,7 +88,6 @@ export class AddressesService {
         return {
             message: 'Address removed successfully',
         };
-    }
-    
+    }  
     
 }

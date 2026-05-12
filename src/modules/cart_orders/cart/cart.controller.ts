@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { CartService } from './cart.service';
+import { CartService, CartWithItems } from './cart.service';
 import { User } from '../../../shared/custom_decorators/user.decorator';
 import { Cart } from '@prisma/client';
 import { AddItemToCartDto } from './dtos/add_item.dto';
@@ -14,7 +14,7 @@ export class CartController {
   @Get()
   async getMyCart(
     @User() user: any
-  ): Promise<Cart>{
+  ): Promise<CartWithItems>{
     return await this.cartService.getMyCart(user.sub);
   }
 

@@ -1,15 +1,24 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { AddItemToCartDto } from './dtos/add_item.dto';
-import { Cart } from '@prisma/client';
+import { Cart, Prisma } from '@prisma/client';
 import { UpdateCartItemQuantityDto } from './dtos/update_action.dto';
+
+export type CartWithItems  = Prisma.CartGetPayload<{
+    include: {
+        cart_items: {
+            include: { variant: true}
+        }
+    }
+}>
+
 
 @Injectable()
 export class CartService {
     constructor(private readonly prisma: PrismaService){}
 
 
-    async getMyCart(userId: string): Promise<Cart>{
+    async getMyCart(userId: string): Promise<CartWithItems>{
         const cart = await this.prisma.cart.findFirst({
             where: { userId},
             include: {
