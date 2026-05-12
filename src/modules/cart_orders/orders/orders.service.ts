@@ -189,4 +189,52 @@ export class OrdersService {
         });
     }
 
+
+    async getActiveOrders(): Promise<Order[]>{
+        return await this.prisma.order.findMany({
+            where: {status: 
+                {in: ['DELIVERED' ,'PENDING', 'PROCESSING', 'SHIPPED' ]}
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email:true
+                    }
+                },
+                _count: {
+                    select: {order_items: true}
+                }
+            },
+            orderBy: {createdAt: 'asc'}
+        })
+    }
+
+
+    async getCanceledOrders(){
+        return await this.prisma.order.findMany({
+            where: {
+                status: 'CANCELLED'
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email:true
+                    }
+                },
+                _count: {
+                    select: {
+                        order_items: true
+                    }
+                }
+            },
+            orderBy: {createdAt: 'desc'}
+        })
+    }
+
 }
