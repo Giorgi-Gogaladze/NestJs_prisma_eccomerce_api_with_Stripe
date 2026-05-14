@@ -21,11 +21,12 @@ export class OrdersService {
         private readonly cartService: CartService
     ){}
 
-    private generateOrderNumber(userId: string, address: string){
-    return (userId.concat(address.replace(' ', '_')).toLowerCase()).concat(String(Math.random() + 10000));
+    private generateOrderNumber(): string{
+     const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+     const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+     return `ORD-${datePart}-${randomPart}`
     }
 
-    //carti gavasuftavo ordersi shemdeg
 
     async createOrder(userId: string, dto: createOrderDto): Promise<OrderWithItems>{
          const myCart = await this.cartService.getMyCart(userId);
@@ -51,11 +52,13 @@ export class OrdersService {
                 };
 
                 totalAmount += Number(item.variant.price) * item.quantity;
-                if(appliedCouon !== null){
-                   totalAmount -= (Number(appliedCouon.discountPerc) * totalAmount) / 100;
-                }
             }
-            const orderNumber = this.generateOrderNumber(userId, address.street);
+            
+            if(appliedCouon !== null){
+                   totalAmount -= (Number(appliedCouon.discountPerc) * totalAmount) / 100;
+            }
+
+            const orderNumber = this.generateOrderNumber();
 
             const order = await tsx.order.create({
                 data: {
@@ -90,6 +93,9 @@ export class OrdersService {
             })
 
            };
+           await tsx.cartItem.deleteMany({
+            where: {cartId: myCart.id}
+           })
 
            return order;
         });
