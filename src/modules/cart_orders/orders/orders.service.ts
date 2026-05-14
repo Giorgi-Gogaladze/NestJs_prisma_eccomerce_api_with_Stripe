@@ -4,7 +4,6 @@ import { createOrderDto } from './dtos/create_order.dto';
 import { CartService } from '../cart/cart.service';
 import { Order, Prisma } from '@prisma/client';
 import { UpdateOrderStatusDto } from './dtos/update_order_status.dto';
-import { pid } from 'process';
 
 export type OrderWithItems = Prisma.OrderGetPayload<{
     include: {
@@ -13,6 +12,26 @@ export type OrderWithItems = Prisma.OrderGetPayload<{
         }
     }
 }>
+
+export type OrderWithCount= Prisma.OrderGetPayload<{
+    include: {
+        _count: {
+            select: {
+                order_items: true
+            }
+        }
+    }
+}>
+
+export type DetailedOrder = Prisma.OrderGetPayload<{
+    include: {
+        order_items: {
+            include: { variant: true }
+        },
+        address: true,
+        coupon: true
+    }
+}>;
 
 @Injectable()
 export class OrdersService {
@@ -53,7 +72,7 @@ export class OrdersService {
 
                 totalAmount += Number(item.variant.price) * item.quantity;
             }
-            
+
             if(appliedCouon !== null){
                    totalAmount -= (Number(appliedCouon.discountPerc) * totalAmount) / 100;
             }
@@ -103,7 +122,7 @@ export class OrdersService {
     }
 
 
-    async getMyOrders(userId: string){
+    async getMyOrders(userId: string): Promise<OrderWithCount[]>{
         const orders = await this.prisma.order.findMany({
             where: {userId},
             orderBy: {createdAt: 'desc'},
@@ -116,10 +135,11 @@ export class OrdersService {
         if(orders.length === 0){
            throw new NotFoundException('You have no orders yet') 
         }
+        return orders;
     }
 
 
-    async getOrderById(orderId: string, userId: string){
+    async getOrderById(orderId: string, userId: string): Promise<DetailedOrder>{
         const order = await this.prisma.order.findFirst({
             where: {
                 id: orderId,
