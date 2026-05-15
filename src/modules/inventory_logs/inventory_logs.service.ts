@@ -1,14 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InventoryChangeReason, Prisma } from '@prisma/client';
 import { LogsQueryDto } from './dtos/logs_query.dto';
 import { PrismaService } from '../../shared/prisma/prisma.service';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import Redis from 'ioredis';
 
 //ქეშეირება არ დამავიწყდეს!!!!!!!!!!
 
 
 @Injectable()
 export class InventoryLogsService {
-  constructor(private readonly prisma: PrismaService){}
+  private redis: Redis;
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
+  ){
+    const store = this.cacheManager.stores[0];
+    this.redis = (store as any).opts.store.client;
+  }
+
+  private async clearLogsCache(){
+    const keys = await this.redis.keys(`inventory_logs:*`);
+
+    if(keys.length > 0){
+      await this.redis.del(...keys)
+    }
+  }
+
+
 
  private async logStockchange(
   tsx: Prisma.TransactionClient,
@@ -22,6 +41,8 @@ export class InventoryLogsService {
     data: { stock: {increment: amount}}
   });
 
+  await this.clearLogsCache();
+
   return await tsx.inventoryLog.create({
     data: {
       variantId,
@@ -31,6 +52,7 @@ export class InventoryLogsService {
       orderId
     }
   })
+
  }
 
 
@@ -48,6 +70,11 @@ export class InventoryLogsService {
 
 
   async getAllLogs(dto: LogsQueryDto){
+    const cacheKey = `inventory_logs:${JSON.stringify(dto)}`;
+
+    const cachedData = await this.cacheManager.get(cacheKey);
+    if (cachedData) return cachedData;
+
      const {limit= 20, page = 1, search,  sortOrder = 'desc', reason} = dto;
      const skip = (page - 1) * limit;
 
@@ -83,7 +110,7 @@ export class InventoryLogsService {
       this.prisma.inventoryLog.count({where})
      ]);
 
-     return {
+     const res = {
       data: logs, 
       meta: {
         total,
@@ -92,7 +119,10 @@ export class InventoryLogsService {
         hasNextPage: page < Math.ceil(total / limit),
         hasPreviousPage: page > 1
       }
-     }
+     };
+
+     await this.cacheManager.set(cacheKey, res, 600);
+     return res;
   }
 
 }

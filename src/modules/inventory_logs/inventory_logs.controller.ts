@@ -1,11 +1,13 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards, UseInterceptors } from "@nestjs/common";
 import { InventoryLogsService } from "./inventory_logs.service";
 import { AtGuard } from "../../shared/guards/at.guard";
 import { RolesGuard } from "../../shared/guards/roles.guard";
 import { LogsQueryDto } from "./dtos/logs_query.dto";
 import { Roles } from "../../shared/custom_decorators/roles.decorator";
+import { CacheInterceptor } from "@nestjs/cache-manager";
 
 @UseGuards(AtGuard, RolesGuard)
+@UseInterceptors(CacheInterceptor)
 @Controller('inventory_logs')
 export class InventoryLogsController{
     constructor(private readonly inventoryService: InventoryLogsService){}
