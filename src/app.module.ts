@@ -20,6 +20,7 @@ import { PrismaModule } from './shared/prisma/prisma.module';
 import { FavoritesModule } from './modules/users/favorites/favorites.module';
 import { CartModule } from './modules/cart_orders/cart/cart.module';
 import { OrdersModule } from './modules/cart_orders/orders/orders.module';
+import { InventoryLogsModule } from './modules/inventory_logs/inventory_logs.module';
 
 @Module({
   imports: [
@@ -38,7 +39,7 @@ import { OrdersModule } from './modules/cart_orders/orders/orders.module';
     },
     inject: [ConfigService]
   }),   PrismaModule,  AuthModule, AddressesModule, CategoriesModule, CloudinaryModule, CouponsModule, AttributesModule,  BrandsModule, ProductsModule, ViewsModule, 
-  ScheduleModule.forRoot(), ReviewsModule, AttributeValuesModule, ProductVariantsModule, FavoritesModule, CartModule, OrdersModule
+  ScheduleModule.forRoot(), ReviewsModule, AttributeValuesModule, ProductVariantsModule, FavoritesModule, CartModule, OrdersModule, InventoryLogsModule
 ],
   controllers: [],
   providers: [],

@@ -17,6 +17,7 @@ model InventoryLog {
 enum InventoryChangeReason {
     SALE
     RETURN
-    ADJUSTMENT
+    CANCELLATION
+    RESTOCK
     OTHER
 }
