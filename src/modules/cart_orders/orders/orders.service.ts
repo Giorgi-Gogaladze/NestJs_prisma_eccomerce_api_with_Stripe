@@ -221,6 +221,7 @@ export class OrdersService {
         }
         return await this.prisma.$transaction(async (tsx) => {
             await tsx.order.update({
+                
                 where: {id: orderId},
                 data: { status: 'CANCELLED'}
             });
