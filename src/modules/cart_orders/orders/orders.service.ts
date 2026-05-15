@@ -4,6 +4,7 @@ import { createOrderDto } from './dtos/create_order.dto';
 import { CartService } from '../cart/cart.service';
 import { Order, Prisma } from '@prisma/client';
 import { UpdateOrderStatusDto } from './dtos/update_order_status.dto';
+import { InventoryLogsService } from '../../inventory_logs/inventory_logs.service';
 
 export type OrderWithItems = Prisma.OrderGetPayload<{
     include: {
@@ -37,7 +38,8 @@ export type DetailedOrder = Prisma.OrderGetPayload<{
 export class OrdersService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly cartService: CartService
+        private readonly cartService: CartService,
+        private readonly inventoryService: InventoryLogsService
     ){}
 
     private generateOrderNumber(): string{
@@ -105,11 +107,13 @@ export class OrdersService {
                     price: item.variant.price
                 }
             });
-
-            await tsx.productVariant.update({
-             where: {id: item.variantId},
-             data : {stock: {decrement: item.quantity}}
-            })
+            
+            await this.inventoryService.recordSale(
+                tsx,
+                item.variantId,
+                item.quantity,
+                order.id
+            )
 
            };
            await tsx.cartItem.deleteMany({
@@ -222,12 +226,7 @@ export class OrdersService {
             });
 
             for(let item of order.order_items){
-                await tsx.productVariant.update({
-                    where: {id: item.variantId},
-                    data: { 
-                        stock:  {increment: item.quantity}
-                    }
-                })
+                await this.inventoryService.recordCancellation(tsx, item.variantId, item.quantity, item.orderId)
             }
             return {message: 'Order canceled successfully'}
 
