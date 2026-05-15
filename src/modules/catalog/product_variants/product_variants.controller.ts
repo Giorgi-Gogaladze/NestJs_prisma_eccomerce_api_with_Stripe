@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ProductVariantsService, ProductWithVariants } from './product_variants.service';
+import { ProductVariantsService } from './product_variants.service';
 import { createProductVariantDto } from './dtos/create_product_variant.dto';
 import { UpdateProductVariantDto } from './dtos/update_product_vaiant.dto';
 import { AtGuard } from '../../../shared/guards/at.guard';
@@ -7,6 +7,7 @@ import { RolesGuard } from '../../../shared/guards/roles.guard';
 import { Roles } from '../../../shared/custom_decorators/roles.decorator';
 import { ProductVariant, Role } from '@prisma/client';
 import { CacheInterceptor } from '@nestjs/cache-manager';
+import { RestockDto } from './dtos/restock.dto';
 
 @Controller('product-variants')
 @UseInterceptors(CacheInterceptor)
@@ -36,6 +37,15 @@ export class ProductVariantsController {
   ) {
     return await this.productVariantsService.getProductAllVariants(productId);
   } 
+
+  @Roles(Role.ADMIN)
+  @Patch('restock:variantId')
+  async restock(
+    @Param('variantId') variantId: string,
+    @Body() dto: RestockDto
+  ){
+    return await this.productVariantsService.restockVariant(variantId, dto)
+  }
 
   @Patch(':variantId')
   @Roles(Role.ADMIN)

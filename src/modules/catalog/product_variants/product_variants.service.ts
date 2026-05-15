@@ -4,6 +4,8 @@ import { createProductVariantDto } from './dtos/create_product_variant.dto';
 import { Prisma, ProductVariant } from '@prisma/client';
 import { UpdateProductVariantDto } from './dtos/update_product_vaiant.dto';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { RestockDto } from './dtos/restock.dto';
+import { InventoryLogsService } from '../../inventory_logs/inventory_logs.service';
 
  export type ProductWithVariants = Prisma.ProductVariantGetPayload<{}>
 
@@ -11,7 +13,8 @@ import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 export class ProductVariantsService {
     constructor(
         private readonly prisma: PrismaService,
-        @Inject(CACHE_MANAGER) private cacheManager: Cache
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
+        private readonly inventoryService: InventoryLogsService
     ){}
 
     private async invalidateProductCache(productId: string){
@@ -186,8 +189,19 @@ export class ProductVariantsService {
     })        
 }
 
-/* async increaseStock(variantId: string, dto: ){
-    await this.prisma.productVariant.update({})
-} */
+async restockVariant(variantId: string, dto: RestockDto){
+    const variant = await this.prisma.productVariant.findUnique({
+        where: { id: variantId }
+    });
+    if (!variant) throw new NotFoundException('Product variant not found');
+
+    return await this.prisma.$transaction(async (tsx) => {
+        return await this.inventoryService.restock(
+            tsx, 
+            variantId, 
+            dto.quantity
+        );
+    });
+}
 
 }

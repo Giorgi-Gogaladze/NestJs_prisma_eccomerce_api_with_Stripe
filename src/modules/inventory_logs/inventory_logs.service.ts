@@ -42,5 +42,6 @@ export class InventoryLogsService {
   async restock(tsx: Prisma.TransactionClient, variantId: string, quantity: number){
     return await this.logStockchange(tsx, variantId, quantity, InventoryChangeReason.RESTOCK)
   }
+  
 
 }
