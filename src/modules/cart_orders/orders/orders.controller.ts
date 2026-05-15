@@ -18,7 +18,7 @@ export class OrdersController {
     @User() user: any,
     @Body() dto: createOrderDto
   ): Promise<OrderWithItems>{
-    return await this.ordersService.createOrder(user.sub, dto)
+    return await this.ordersService.createOrder(user.sub, dto) 
   }
 
   @Get()
@@ -29,13 +29,13 @@ export class OrdersController {
   }
 
   @Roles('ADMIN')
-  @Get()
+  @Get('/active_orders')
   async getActiveOrders(): Promise<Order[]>{
     return await this.ordersService.getActiveOrders()
   }
 
   @Roles('ADMIN')
-  @Get()
+  @Get('/canceled')
   async getCanceledOrders(){
     return await this.ordersService.getCanceledOrders()
   }
@@ -54,7 +54,7 @@ export class OrdersController {
   async updateStatus(
     @Param('orderId') orderId: string,
     @Body() dto: UpdateOrderStatusDto
-  ): Promise<Order>{
+  ){
     return await this.ordersService.updateStatus(orderId, dto)
   }
 
@@ -64,7 +64,7 @@ export class OrdersController {
     @Param('orderId') orderId: string,
     @User() user: any
   ){
-    return await this.ordersService.cancelOrder(orderId, user.sub)
+    return await this.ordersService.cancelOrder(user.sub, orderId) 
   }
 
 

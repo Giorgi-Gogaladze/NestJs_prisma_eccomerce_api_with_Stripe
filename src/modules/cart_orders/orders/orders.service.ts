@@ -147,7 +147,13 @@ export class OrdersService {
             },
             include: {
                 order_items:{
-                    include: { variant: true}
+                    include: { 
+                        variant: {
+                            include: {
+                                product: true
+                            }
+                        }
+                    }
                 },
                 address: true,
                 coupon: true
@@ -158,7 +164,7 @@ export class OrdersService {
     }
 
 
-    async updateStatus(orderId: string, dto: UpdateOrderStatusDto): Promise<Order>{
+    async updateStatus(orderId: string, dto: UpdateOrderStatusDto){
         const currentOrder = await this.prisma.order.findUnique({
             where: {id: orderId}
         });
@@ -177,7 +183,20 @@ export class OrdersService {
                 where: {id: orderId},
                 data: {
                     status: dto.status
-                }
+                },
+                include: {
+                order_items:{
+                    include: { 
+                        variant: {
+                            include: {
+                                product: true
+                            }
+                        }
+                    }
+                },
+                address: true,
+                coupon: true
+            }
             })
         } catch (error) {
             throw new BadRequestException('Failed ot update order status')
@@ -203,10 +222,10 @@ export class OrdersService {
             });
 
             for(let item of order.order_items){
-                const updatedQuant = await tsx.productVariant.update({
-                    where: {id: item.id},
-                    data: { stock: 
-                        {increment: item.quantity}
+                await tsx.productVariant.update({
+                    where: {id: item.variantId},
+                    data: { 
+                        stock:  {increment: item.quantity}
                     }
                 })
             }
@@ -262,5 +281,6 @@ export class OrdersService {
             orderBy: {createdAt: 'desc'}
         })
     }
+
 
 }
