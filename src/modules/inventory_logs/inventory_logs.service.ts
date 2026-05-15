@@ -31,5 +31,16 @@ export class InventoryLogsService {
  }
 
 
- 
+  async recordCancellation(tsx: Prisma.TransactionClient, variantId: string, quantity: number, orderId: string){
+    return await this.logStockchange(tsx, variantId, quantity, InventoryChangeReason.CANCELLATION, orderId)
+  }
+
+  async recordSale(tsx: Prisma.TransactionClient, variantId: string, quantity: number, orderId: string) {
+    return await this.logStockchange(tsx, variantId, -quantity, InventoryChangeReason.SALE, orderId); 
+  }
+
+  async restock(tsx: Prisma.TransactionClient, variantId: string, quantity: number){
+    return await this.logStockchange(tsx, variantId, quantity, InventoryChangeReason.RESTOCK)
+  }
+
 }

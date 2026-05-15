@@ -186,4 +186,8 @@ export class ProductVariantsService {
     })        
 }
 
+/* async increaseStock(variantId: string, dto: ){
+    await this.prisma.productVariant.update({})
+} */
+
 }
