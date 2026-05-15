@@ -1,5 +1,5 @@
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
-import { Inject, Injectable, Logger, ParseIntPipe } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Redis } from 'ioredis'
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { Cron, CronExpression } from "@nestjs/schedule";
@@ -16,8 +16,11 @@ export class ViewsService{
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
         private prisma: PrismaService
     ){
-        const store = this.cacheManager.stores[0];
-        this.redis = (store as any).opts.store.client;    // ვიღებთ Redis კლიენტს cache-manager-იდან
+        const store = (this.cacheManager as any).stores?.[0] ?? (this.cacheManager as any).store;
+        this.redis = (store as any)?.opts?.store?.client ?? (this.cacheManager as any)?.store?.client ?? (store as any)?.client ?? (this.cacheManager as any)?.client;
+        if(!this.redis){
+            this.logger.warn('Redis client not found on cache manager; view sync will be skipped.');
+        }
     }
 
 
@@ -54,9 +57,14 @@ export class ViewsService{
     async syncToDb(){
 
         // (ჩემთვის) ვიღებთ ყველა ქის, რომელიც ნახვებს ინახავს
+        if(!this.redis){
+            this.logger.warn('Redis client missing, skipping syncToDb.');
+            return;
+        }
+
         const keys = await this.redis.keys('product:views:*');
 
-        if(keys.length === 0){
+        if(!keys || keys.length === 0){
             this.logger.log('No new views to sync.');
             return;
         }

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InventoryChangeReason, Prisma } from '@prisma/client';
 import { LogsQueryDto } from './dtos/logs_query.dto';
 import { PrismaService } from '../../shared/prisma/prisma.service';
@@ -15,11 +15,17 @@ export class InventoryLogsService {
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ){
-    const store = this.cacheManager.stores[0];
-    this.redis = (store as any).opts.store.client;
+    const store = (this.cacheManager as any).stores?.[0] ?? (this.cacheManager as any).store;
+    this.redis = (store as any)?.opts?.store?.client ?? (this.cacheManager as any)?.store?.client ?? (store as any)?.client ?? (this.cacheManager as any)?.client;
+    if(!this.redis){
+      const logger = new Logger(InventoryLogsService.name);
+      logger.warn('Redis client not found on cache manager; cache cleanup will be skipped.');
+    }
   }
 
   private async clearLogsCache(){
+    if(!this.redis) return;
+
     const keys = await this.redis.keys(`inventory_logs:*`);
 
     if(keys.length > 0){
