@@ -49,5 +49,50 @@ export class PaymentService {
             throw new InternalServerErrorException(`Payment checkout failed: ${error.message}`);
         }
     }
-    
+
+
+    //ეს ფუნქცია მუშავდება მაშინ, როდესაც Stripe Webhook გვიდასტურებს, რომ გადახდა წარმატებულია.
+    async handleSuccessfulPayment(paymentIntentId: string){
+        const payment = await this.prisma.payment.findUnique({
+            where: {stripePaymentIntentId: paymentIntentId}, 
+            include: {order: true}
+        });
+
+        if(!payment) return;
+        if(payment.status === PaymentStatus.SUCCEEDED) return;  //ტუ უკვე საქსესია, აღარაფერი გავაკეთოთ
+        
+        await this.prisma.$transaction(async (tsx) => {
+            await tsx.payment.update({
+                where: {id: payment.id},
+                data: {status: PaymentStatus.SUCCEEDED}
+            });
+
+            await tsx.order.update({
+                where: {id: payment.order.id},
+                data: {status: 'PAID'}
+            })
+        })
+    }
+
+    async handleFailedPayment(paymentIntentId: string){
+        const payment = await this.prisma.payment.findUnique({
+            where: {stripePaymentIntentId: paymentIntentId}, 
+        });
+
+        if (!payment) return;
+        if (payment.status === PaymentStatus.FAILED) return;
+
+        await this.prisma.$transaction(async (tx) => {
+            await tx.payment.update({
+                where: { id: payment.id },
+                data: { status: PaymentStatus.FAILED }
+            });
+
+            await tx.order.update({
+                where: { id: payment.orderId },
+                data: { status: 'CANCELLED' } 
+            });
+        });
+    }
+
 }
