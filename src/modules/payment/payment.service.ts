@@ -1,14 +1,15 @@
 import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { STRIPE_CLIENT } from './stripe/stripe.module';
 import  Stripe from 'stripe';
-import { Currency, PaymentStatus, Prisma } from '@prisma/client';
+import { Currency, PaymentStatus} from '@prisma/client';
 import { PrismaService } from '../../shared/prisma/prisma.service';
+import { InventoryLogsService } from '../inventory_logs/inventory_logs.service';
 
 @Injectable()
 export class PaymentService {
     constructor(
         @Inject(STRIPE_CLIENT) private readonly stripe: InstanceType<typeof Stripe>,
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
     ){}
 
     async createCheckout(orderId: string){
@@ -71,6 +72,7 @@ export class PaymentService {
                 where: {id: payment.order.id},
                 data: {status: 'PAID'}
             })
+
         })
     }
 
