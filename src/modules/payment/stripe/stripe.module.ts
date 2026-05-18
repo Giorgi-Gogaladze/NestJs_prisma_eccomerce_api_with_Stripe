@@ -1,5 +1,6 @@
 import { Global, Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { PaymentModule } from '../payment.module';
 import Stripe from 'stripe'
 
 export const STRIPE_CLIENT = 'STRIPE_CLIENT';
@@ -21,7 +22,8 @@ export const STRIPE_CLIENT = 'STRIPE_CLIENT';
          },
        },
     ],
-    exports: [STRIPE_CLIENT]
+    exports: [STRIPE_CLIENT],
+    imports: [PaymentModule]
 })
 
 export class StripeModule{}
