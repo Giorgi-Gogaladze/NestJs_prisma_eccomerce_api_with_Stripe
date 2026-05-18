@@ -39,7 +39,7 @@ export class ProductVariantsController {
   } 
 
   @Roles(Role.ADMIN)
-  @Patch('restock:variantId')
+  @Patch('restock/:variantId')
   async restock(
     @Param('variantId') variantId: string,
     @Body() dto: RestockDto

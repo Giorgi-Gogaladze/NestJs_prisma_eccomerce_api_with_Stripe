@@ -71,7 +71,7 @@ export class ViewsService{
 
         for(const key of keys){
             const productId = key.split(':').pop();
-            // getdel იღებს მნიშვნელობას და იმავე წამს შლის რეიდისიდან
+            //(ჩემთვის) getdel იღებს მნიშვნელობას და იმავე წამს შლის რედისიდან
             const count = await this.redis.getdel(key);
 
             if(count && productId){

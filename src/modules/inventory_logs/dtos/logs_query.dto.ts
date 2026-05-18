@@ -29,8 +29,9 @@ export class LogsQueryDto {
     @IsString()
     search?: string;
 
+    @IsOptional()
     @IsEnum(InventoryChangeReason, {
         message: 'reasons must be SALE, RETURN, CANCELLATION, RESTOCK or OTHER'})
-    reason: string;
+    reason?: string;
 
 }
