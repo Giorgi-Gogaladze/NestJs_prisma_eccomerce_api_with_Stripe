@@ -1,10 +1,12 @@
-import { BadRequestException, Controller, Headers, HttpCode, HttpStatus, Inject, Post, Req } from '@nestjs/common';
+import { BadRequestException, Controller, Headers, HttpCode, HttpStatus, Inject, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { STRIPE_CLIENT } from './stripe/stripe.module';
 import Stripe from 'stripe';;
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
+import { AtGuard } from '../../shared/guards/at.guard';
 
+@UseGuards(AtGuard)
 @Controller('payment')
 export class PaymentController {
   constructor(
@@ -52,4 +54,9 @@ export class PaymentController {
     return {received: true}
 
   };
+
+  @Post('create-checkout/:orderId')
+  async createCheckout(@Param('orderId') orderId: string) {
+    return await this.paymentService.createCheckout(orderId);
+  }
 }
